@@ -106,3 +106,8 @@ zip -r release.zip release/
 ### 7. Keamanan & Kebersihan Repo
 - Penambahan `.gitignore` untuk memastikan data sensitif dan folder besar seperti `node_modules` tidak masuk ke dalam repository.
 - Pembersihan berkala cache sistem selama proses build untuk menghemat ruang disk.
+
+### 8. Perbaikan Browser Launch (Bug Fix)
+Kami telah memperbaiki masalah di mana browser Chrome gagal dijalankan pada beberapa environment Linux (khususnya saat dijalankan sebagai `root`) yang menyebabkan error `Trace/breakpoint trap`. Perbaikan meliputi:
+- Penambahan flag stabilitas Puppeteer: `--disable-namespace-sandbox`, `--no-zygote`, dll.
+- Pembersihan profil otomatis untuk menjamin stabilitas setiap kali dijalankan.

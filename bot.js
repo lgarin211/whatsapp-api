@@ -11,7 +11,9 @@ const getBrowserPath = () => {
   const locations = [
     path.join(execDir, 'browsers'),
     path.join(execDir, 'bin', 'browsers'),
-    path.join(__dirname, 'bin', 'browsers')
+    path.join(__dirname, 'bin', 'browsers'),
+    // Also check parent dir if in a subfolder release
+    path.join(path.dirname(execDir), 'browsers')
   ];
 
   const platform = process.platform === 'win32' ? 'win' : 'linux';
@@ -29,10 +31,12 @@ const getBrowserPath = () => {
 };
 
 const newBotClient = (sendEvent) => {
+  const browserPath = process.env.CHROME_PATH || getBrowserPath();
+
   const client = new Client({
     restartOnAuthFail: true,
     puppeteer: {
-      executablePath: process.env.CHROME_PATH || getBrowserPath(),
+      executablePath: browserPath,
       headless: true,
       args: [
         "--no-sandbox",
@@ -42,6 +46,13 @@ const newBotClient = (sendEvent) => {
         "--no-first-run",
         "--no-zygote",
         "--disable-gpu",
+        "--disable-software-rasterizer",
+        "--disable-namespace-sandbox",
+        "--disable-infobars",
+        "--window-position=0,0",
+        "--ignore-certificate-errors",
+        "--ignore-certificate-errors-spki-list",
+        "--disable-extensions"
       ],
     },
     authStrategy: new LocalAuth({
