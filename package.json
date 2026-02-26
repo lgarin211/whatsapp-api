@@ -8,7 +8,8 @@
     "start:dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:linux": "pkg app.js --targets node18-linux-x64 --out-path bin",
-    "build:win": "pkg app.js --targets node18-win-x64 --out-path bin"
+    "build:win": "pkg app.js --targets node18-win-x64 --out-path bin",
+    "build:release": "npm run build:linux && npm run build:win && rm -rf release && mkdir -p release/browsers && cp -r bin/browsers/* release/browsers/ && mv bin/app-linux release/whatsapp-api-linux && mv bin/app-win.exe release/whatsapp-api-win.exe && split -b 90M release/whatsapp-api-linux release/whatsapp-api-linux.part_ && rm release/whatsapp-api-linux && split -b 90M release/whatsapp-api-win.exe release/whatsapp-api-win.exe.part_ && rm release/whatsapp-api-win.exe && split -b 90M release/browsers/linux/chrome release/browsers/linux/chrome.part_ && rm release/browsers/linux/chrome && split -b 90M release/browsers/win/chrome.dll release/browsers/win/chrome.dll.part_ && rm release/browsers/win/chrome.dll && cp restore.sh release/ 2>/dev/null || true && cp restore.bat release/ 2>/dev/null || true"
   },
   "keywords": [
     "whatsapp-api",

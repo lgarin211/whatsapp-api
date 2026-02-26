@@ -84,6 +84,25 @@ Kami telah menyediakan opsi build executable untuk **Linux** dan **Windows** di 
   - Di Windows: Jalankan `restore.bat` di dalam folder `release`.
 - **Zero Dependencies**: Setelah digabungkan, cukup jalankan binary-nya dan aplikasi siap digunakan.
 
-### 5. Keamanan & Kebersihan Repo
+### 5. Cara Build Ulang (Rebuild)
+Jika Anda melakukan perubahan pada kode sumber (`app.js`, `bot.js`, atau folder `modular/`) dan ingin memperbarui file executable di folder `release/`, ikuti langkah berikut:
+1. Pastikan Anda berada di root direktori proyek.
+2. Jalankan perintah:
+   ```bash
+   npm run build:release
+   ```
+3. Perintah ini akan otomatis membangun ulang binary Linux & Windows, menyalin folder `browsers`, dan memecah binary besar menjadi bagian-bagian `.part_*` agar siap di-push ke GitHub.
+
+### 6. Cara Membuat Archive (Zip)
+Jika Anda ingin mengirim folder `release/` dalam bentuk file ZIP namun perintah `zip` belum terinstall di server, jalankan perintah ini terlebih dahulu:
+```bash
+sudo apt update && sudo apt install zip -y
+```
+Setelah itu, buat file zip dengan perintah:
+```bash
+zip -r release.zip release/
+```
+
+### 7. Keamanan & Kebersihan Repo
 - Penambahan `.gitignore` untuk memastikan data sensitif dan folder besar seperti `node_modules` tidak masuk ke dalam repository.
 - Pembersihan berkala cache sistem selama proses build untuk menghemat ruang disk.
