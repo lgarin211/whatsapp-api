@@ -9,7 +9,7 @@ const fileUpload = require('express-fileupload');
 const axios = require('axios');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger');
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 8001;
 
 const app = express();
 const server = http.createServer(app);
