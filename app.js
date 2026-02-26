@@ -11,6 +11,8 @@ const axios = require("axios");
 const crypto = require("crypto")
 const { newBotClient } = require("./bot");
 const { sendEvent, registerSse, unregisterSse, sendLastDataSse } = require("./sse");
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
 
 
 const port = process.env.PORT || 8001;
@@ -39,6 +41,18 @@ app.use(
   })
 );
 
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+/**
+ * @openapi
+ * /:
+ *   get:
+ *     description: Welcome to the WhatsApp API
+ *     responses:
+ *       200:
+ *         description: Returns the index.html page.
+ */
 app.get("/", (req, res) => {
   res.sendFile("index.html", {
     root: __dirname,
@@ -52,6 +66,15 @@ const checkRegisteredNumber = async function (number) {
   return isRegistered;
 };
 
+/**
+ * @openapi
+ * /whatsapp-status:
+ *   get:
+ *     description: Get WhatsApp connection status via SSE
+ *     responses:
+ *       200:
+ *         description: SSE stream
+ */
 app.get("/whatsapp-status", (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Content-Type', 'text/event-stream');
@@ -67,7 +90,32 @@ app.get("/whatsapp-status", (req, res) => {
   });
 });
 
-// Send Group Media
+/**
+ * @openapi
+ * /send-group-media:
+ *   post:
+ *     description: Send media to a WhatsApp group
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               caption:
+ *                 type: string
+ *               mediaPath:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Media sent successfully
+ *       422:
+ *         description: Validation error
+ */
 app.post(
   "/send-group-media",
   [
@@ -124,7 +172,33 @@ app.post(
   }
 );
 
-// Send message
+/**
+ * @openapi
+ * /send-message:
+ *   post:
+ *     description: Send a text message to a WhatsApp number
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - number
+ *               - message
+ *             properties:
+ *               number:
+ *                 type: string
+ *               message:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Message sent successfully
+ *       422:
+ *         description: Validation error
+ *       500:
+ *         description: Server error
+ */
 app.post(
   "/send-message",
   [body("number").notEmpty(), body("message").notEmpty()],
@@ -169,7 +243,34 @@ app.post(
   }
 );
 
-// Send media
+/**
+ * @openapi
+ * /send-media:
+ *   post:
+ *     description: Send media from a URL to a WhatsApp number
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - number
+ *               - file
+ *             properties:
+ *               number:
+ *                 type: string
+ *               caption:
+ *                 type: string
+ *               file:
+ *                 type: string
+ *                 description: URL to the media file
+ *     responses:
+ *       200:
+ *         description: Media sent successfully
+ *       500:
+ *         description: Server error
+ */
 app.post("/send-media", async (req, res) => {
   const number = phoneNumberFormatter(req.body.number);
   const caption = req.body.caption;
@@ -208,8 +309,110 @@ app.post("/send-media", async (req, res) => {
     });
 });
 
+/**
+ * @openapi
+ * /send-image:
+ *   post:
+ *     description: Send an image from a file upload to a WhatsApp number
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - number
+ *               - image
+ *             properties:
+ *               number:
+ *                 type: string
+ *               caption:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Image sent successfully
+ *       422:
+ *         description: Validation error
+ *       500:
+ *         description: Server error
+ */
+app.post("/send-image", async (req, res) => {
+  if (!req.files || !req.files.image) {
+    return res.status(422).json({
+      status: false,
+      message: "No image uploaded",
+    });
+  }
+
+  const number = phoneNumberFormatter(req.body.number);
+  const caption = req.body.caption;
+  const image = req.files.image;
+
+  const isRegisteredNumber = await checkRegisteredNumber(number);
+
+  if (!isRegisteredNumber) {
+    return res.status(422).json({
+      status: false,
+      message: "The number is not registered",
+    });
+  }
+
+  const media = new MessageMedia(image.mimetype, image.data.toString("base64"), image.name);
+
+  client
+    .sendMessage(number, media, {
+      caption: caption,
+    })
+    .then((response) => {
+      res.status(200).json({
+        status: true,
+        response: response,
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        status: false,
+        response: err,
+      });
+    });
+});
+
+/**
+ * @openapi
+ * /send-group-media-file:
+ *   post:
+ *     description: Send media from a local file path to a WhatsApp group
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *             properties:
+ *               id:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               caption:
+ *                 type: string
+ *               file:
+ *                 type: string
+ *                 description: Local file path
+ *     responses:
+ *       200:
+ *         description: Media sent successfully
+ *       422:
+ *         description: Validation error
+ *       500:
+ *         description: Server error
+ */
 app.post(
-  "/send-group-media",
+  "/send-group-media-file",
   [
     body("id").custom((value, { req }) => {
       if (!value && !req.body.name) {
@@ -279,6 +482,37 @@ app.post(
   }
 );
 
+/**
+ * @openapi
+ * /send-group-media-via-url:
+ *   post:
+ *     description: Send media from a URL to a WhatsApp group
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *             properties:
+ *               id:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               caption:
+ *                 type: string
+ *               file:
+ *                 type: string
+ *                 description: URL to the media file
+ *     responses:
+ *       200:
+ *         description: Media sent successfully
+ *       422:
+ *         description: Validation error
+ *       500:
+ *         description: Server error
+ */
 app.post(
   "/send-group-media-via-url",
   [
@@ -361,6 +595,34 @@ const findGroupByName = async function (name) {
 
 // Send message to group
 // You can use chatID or group name, yea!
+/**
+ * @openapi
+ * /send-group-message:
+ *   post:
+ *     description: Send a text message to a WhatsApp group
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - message
+ *             properties:
+ *               id:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               message:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Message sent successfully
+ *       422:
+ *         description: Validation error
+ *       500:
+ *         description: Server error
+ */
 app.post(
   "/send-group-message",
   [
@@ -418,6 +680,30 @@ app.post(
 );
 
 // Clearing message on spesific chat
+/**
+ * @openapi
+ * /clear-message:
+ *   post:
+ *     description: Clear messages on a specific WhatsApp chat
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - number
+ *             properties:
+ *               number:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Messages cleared successfully
+ *       422:
+ *         description: Validation error
+ *       500:
+ *         description: Server error
+ */
 app.post("/clear-message", [body("number").notEmpty()], async (req, res) => {
   const errors = validationResult(req).formatWith(({ msg }) => {
     return msg;

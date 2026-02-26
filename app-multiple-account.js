@@ -7,6 +7,8 @@ const fs = require('fs');
 const { phoneNumberFormatter } = require('./helpers/formatter');
 const fileUpload = require('express-fileupload');
 const axios = require('axios');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
 const port = process.env.PORT || 8000;
 
 const app = express();
@@ -30,6 +32,18 @@ app.use(fileUpload({
   debug: false
 }));
 
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+/**
+ * @openapi
+ * /:
+ *   get:
+ *     description: Welcome to the WhatsApp Multiple Account API
+ *     responses:
+ *       200:
+ *         description: Returns the index-multiple-account.html page.
+ */
 app.get('/', (req, res) => {
   res.sendFile('index-multiple-account.html', {
     root: __dirname
@@ -39,12 +53,12 @@ app.get('/', (req, res) => {
 const sessions = [];
 const SESSIONS_FILE = './whatsapp-sessions.json';
 
-const createSessionsFileIfNotExists = function() {
+const createSessionsFileIfNotExists = function () {
   if (!fs.existsSync(SESSIONS_FILE)) {
     try {
       fs.writeFileSync(SESSIONS_FILE, JSON.stringify([]));
       console.log('Sessions file created successfully.');
-    } catch(err) {
+    } catch (err) {
       console.log('Failed to create sessions file: ', err);
     }
   }
@@ -52,19 +66,19 @@ const createSessionsFileIfNotExists = function() {
 
 createSessionsFileIfNotExists();
 
-const setSessionsFile = function(sessions) {
-  fs.writeFile(SESSIONS_FILE, JSON.stringify(sessions), function(err) {
+const setSessionsFile = function (sessions) {
+  fs.writeFile(SESSIONS_FILE, JSON.stringify(sessions), function (err) {
     if (err) {
       console.log(err);
     }
   });
 }
 
-const getSessionsFile = function() {
+const getSessionsFile = function () {
   return JSON.parse(fs.readFileSync(SESSIONS_FILE));
 }
 
-const createSession = function(id, description) {
+const createSession = function (id, description) {
   console.log('Creating session: ' + id);
   const client = new Client({
     restartOnAuthFail: true,
@@ -111,7 +125,7 @@ const createSession = function(id, description) {
     io.emit('message', { id: id, text: 'Whatsapp is authenticated!' });
   });
 
-  client.on('auth_failure', function() {
+  client.on('auth_failure', function () {
     io.emit('message', { id: id, text: 'Auth failure, restarting...' });
   });
 
@@ -150,7 +164,7 @@ const createSession = function(id, description) {
   }
 }
 
-const init = function(socket) {
+const init = function (socket) {
   const savedSessions = getSessionsFile();
 
   if (savedSessions.length > 0) {
@@ -178,16 +192,47 @@ const init = function(socket) {
 init();
 
 // Socket IO
-io.on('connection', function(socket) {
+io.on('connection', function (socket) {
   init(socket);
 
-  socket.on('create-session', function(data) {
+  socket.on('create-session', function (data) {
     console.log('Create session: ' + data.id);
     createSession(data.id, data.description);
   });
 });
 
 // Send message
+/**
+ * @openapi
+ * /send-message:
+ *   post:
+ *     description: Send a text message from a specific session
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - sender
+ *               - number
+ *               - message
+ *             properties:
+ *               sender:
+ *                 type: string
+ *                 description: Session ID
+ *               number:
+ *                 type: string
+ *               message:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Message sent successfully
+ *       422:
+ *         description: Validation error
+ *       500:
+ *         description: Server error
+ */
 app.post('/send-message', async (req, res) => {
   console.log(req);
 
@@ -234,6 +279,6 @@ app.post('/send-message', async (req, res) => {
   });
 });
 
-server.listen(port, function() {
+server.listen(port, function () {
   console.log('App running on *: ' + port);
 });
