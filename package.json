@@ -6,10 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "start:dev": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build:linux": "pkg app.js --targets node18-linux-x64 --output bin/whatsapp-api-linux",
-    "build:win": "pkg app.js --targets node18-win-x64 --output bin/whatsapp-api-win.exe",
-    "build:release": "npm run build:linux && npm run build:win && rm -rf release && mkdir -p release/browsers && cp -r bin/browsers/* release/browsers/ && cp bin/whatsapp-api-linux release/ && cp bin/whatsapp-api-win.exe release/ && split -b 84M release/whatsapp-api-linux release/whatsapp-api-linux.part_ && rm release/whatsapp-api-linux && split -b 84M release/whatsapp-api-win.exe release/whatsapp-api-win.exe.part_ && rm release/whatsapp-api-win.exe && split -b 84M release/browsers/linux/chrome release/browsers/linux/chrome.part_ && rm release/browsers/linux/chrome && split -b 84M release/browsers/win/chrome.dll release/browsers/win/chrome.dll.part_ && rm release/browsers/win/chrome.dll && cp restore.sh release/ 2>/dev/null || true && cp restore.bat release/ 2>/dev/null || true"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "whatsapp-api",
@@ -32,17 +29,6 @@
     "whatsapp-web.js": "^1.34.4"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22",
-    "pkg": "^5.8.1"
-  },
-  "pkg": {
-    "assets": [
-      "index.html",
-      "index-multiple-account.html",
-      "helpers/**/*",
-      "modular/**/*",
-      "media/**/*",
-      "swagger.js"
-    ]
+    "nodemon": "^2.0.22"
   }
 }

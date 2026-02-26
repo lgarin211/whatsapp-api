@@ -57,67 +57,35 @@ And we decided (for this example) to use time as the filename, because the media
 
 ## Support Me
 
-You can make a support for this work by [DONATING](./DONATE.md). Thank you.
+You can make a support for this work by [DONATING](./DONATE.md). Thank you. (Note: DONATE.md has been removed for a cleaner repo, consider supporting the original author).
 
 ---
 
 ## Update dari Agustinus
 
-Proyek ini telah mengalami beberapa pembaruan besar untuk meningkatkan struktur, transparansi, dan kemudahan deployment:
+Proyek ini telah mengalami beberapa pembaruan besar untuk meningkatkan struktur, transparansi, dan stabilitas:
 
 ### 1. Modularisasi Kode
-Logika aplikasi yang sebelumnya menumpuk di `app.js` telah dipisah menjadi beberapa modul di folder `modular/`. Hal ini membuat pemeliharaan kode menjadi jauh lebih mudah dan struktur aplikasi lebih bersih.
+Logika aplikasi telah dipisah menjadi beberapa modul di folder `modular/` dan `bot.js`. Hal ini membuat pemeliharaan kode menjadi jauh lebih mudah dan struktur aplikasi lebih bersih.
 
 ### 2. Sistem Logging & Monitoring
-- **Automated Logs**: Sekarang setiap request dan aktivitas client dicatat otomatis ke dalam folder `logs/` dengan struktur folder berdasarkan tanggal dan jam (`logs/YYYY-MM-DD/HH/`).
+- **Automated Logs**: Sekarang setiap request dan aktivitas client dicatat otomatis ke dalam folder `logs/`.
 - **Log Monitoring UI**: Tersedia endpoint `/logs` untuk memantau aktivitas sistem secara real-time langsung dari browser.
 
 ### 3. Dashboard Interaktif
 Halaman utama (`/`) telah diperbarui dengan antarmuka yang modern untuk memudahkan navigasi ke endpoint API, dokumentasi Swagger, dan sistem log.
 
-### 4. Portable Release (Executable)
-Meskipun browser Chrome sudah disertakan, sistem operasi Linux (Host) Anda tetap memerlukan beberapa library dasar agar Chrome bisa berjalan.
+### 4. Prasyarat Host Linux (Headless)
+Agar browser Chrome (Puppeteer) dapat berjalan lancar di lingkungan Linux tanpa GUI (headless), jalankan perintah ini terlebih dahulu untuk menginstal library sistem:
 
-**Prasyarat di Server Linux Baru (Headless):**
-Jika Anda menggunakan server Linux yang baru diinstal (misalnya Ubuntu 24.04+), jalankan perintah ini terlebih dahulu untuk menginstal library pendukung:
 ```bash
 sudo apt update && sudo apt install -y libatk1.0-0t64 libatk-bridge2.0-0t64 libcups2t64 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxext6 libxfixes3 libxrandr2 libgbm1 libasound2t64 libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libnss3 libnspr4
 ```
-*(Catatan: Jika Anda menggunakan Ubuntu versi lebih lama, hapus akhiran `t64` pada nama paket di atas).*
+*(Catatan: Jika Anda menggunakan Ubuntu versi sebelum 24.04, hapus akhiran `t64` pada nama paket di atas).*
 
-**Langkah Instalasi:**
-1. Kami telah menyediakan opsi build executable untuk **Linux** dan **Windows** di folder `release/`. 
-- **Bundled Chrome**: Browser Chrome sudah disertakan di dalam paket rilis.
-- **Catatan Penting**: Karena batasan ukuran file di GitHub, file binary besar telah dipecah menjadi beberapa bagian (`.part_*`).
-- **Cara Menggabungkan Kembali**: 
-  - Di Linux: Jalankan `bash restore.sh` di dalam folder `release`.
-  - Di Windows: Jalankan `restore.bat` di dalam folder `release`.
-- **Zero Dependencies**: Setelah digabungkan, cukup jalankan binary-nya dan aplikasi siap digunakan.
+### 5. Keamanan & Kebersihan Repo
+- Penambahan `.gitignore` untuk memastikan data sensitif dan file build tidak masuk ke dalam repository.
+- Pembersihan berkala file-file legacy yang tidak digunakan.
 
-### 5. Cara Build Ulang (Rebuild)
-Jika Anda melakukan perubahan pada kode sumber (`app.js`, `bot.js`, atau folder `modular/`) dan ingin memperbarui file executable di folder `release/`, ikuti langkah berikut:
-1. Pastikan Anda berada di root direktori proyek.
-2. Jalankan perintah:
-   ```bash
-   npm run build:release
-   ```
-3. Perintah ini akan otomatis membangun ulang binary Linux & Windows, menyalin folder `browsers`, dan memecah binary besar menjadi bagian-bagian `.part_*` agar siap di-push ke GitHub.
-
-### 6. Cara Membuat Archive (Zip)
-Jika Anda ingin mengirim folder `release/` dalam bentuk file ZIP namun perintah `zip` belum terinstall di server, jalankan perintah ini terlebih dahulu:
-```bash
-sudo apt update && sudo apt install zip -y
-```
-Setelah itu, buat file zip dengan perintah:
-```bash
-zip -r release.zip release/
-```
-
-### 7. Keamanan & Kebersihan Repo
-- Penambahan `.gitignore` untuk memastikan data sensitif dan folder besar seperti `node_modules` tidak masuk ke dalam repository.
-- Pembersihan berkala cache sistem selama proses build untuk menghemat ruang disk.
-
-### 8. Perbaikan Browser Launch (Bug Fix)
-Kami telah memperbaiki masalah di mana browser Chrome gagal dijalankan pada beberapa environment Linux (khususnya saat dijalankan sebagai `root`) yang menyebabkan error `Trace/breakpoint trap`. Perbaikan meliputi:
-- Penambahan flag stabilitas Puppeteer: `--disable-namespace-sandbox`, `--no-zygote`, dll.
-- Pembersihan profil otomatis untuk menjamin stabilitas setiap kali dijalankan.
+### 6. Perbaikan Browser Launch (Bug Fix)
+Kami telah memperbaiki masalah di mana browser Chrome gagal dijalankan pada beberapa environment Linux (khususnya saat dijalankan sebagai `root`). Perbaikan meliputi penambahan flag stabilitas Puppeteer: `--disable-namespace-sandbox`, `--no-zygote`, dll.
