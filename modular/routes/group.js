@@ -3,6 +3,8 @@ const { MessageMedia } = require("whatsapp-web.js");
 const axios = require("axios");
 const fs = require("fs");
 const { client, findGroupByName } = require("../whatsapp");
+const { log } = require("../../helpers/logger");
+
 
 module.exports = function (app) {
     /**
@@ -43,6 +45,7 @@ module.exports = function (app) {
             body("message").notEmpty(),
         ],
         async (req, res) => {
+            log(`Request: POST /send-group-media - ID: ${req.body.id}, Name: ${req.body.name}`);
             let chatId = req.body.id;
             const groupName = req.body.name;
 
@@ -124,6 +127,7 @@ module.exports = function (app) {
             body("message").notEmpty(),
         ],
         async (req, res) => {
+            log(`Request: POST /send-group-media-file - ID: ${req.body.id}, Name: ${req.body.name}, File: ${req.body.file}`);
             let chatId = req.body.id;
             const groupName = req.body.name;
 
@@ -211,6 +215,7 @@ module.exports = function (app) {
             body("message").notEmpty(),
         ],
         async (req, res) => {
+            log(`Request: POST /send-group-media-via-url - ID: ${req.body.id}, Name: ${req.body.name}, URL: ${req.body.file}`);
             let chatId = req.body.id;
             const groupName = req.body.name;
 
@@ -302,6 +307,7 @@ module.exports = function (app) {
             body("message").notEmpty(),
         ],
         async (req, res) => {
+            log(`Request: POST /send-group-message - ID: ${req.body.id}, Name: ${req.body.name}`);
             const errors = validationResult(req).formatWith(({ msg }) => {
                 return msg;
             });

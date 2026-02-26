@@ -1,4 +1,6 @@
 const { registerSse, unregisterSse, sendLastDataSse } = require("../../sse");
+const { log } = require("../../helpers/logger");
+
 
 module.exports = function (app) {
     /**
@@ -11,6 +13,7 @@ module.exports = function (app) {
      *         description: SSE stream
      */
     app.get("/whatsapp-status", (req, res) => {
+        log('Request: GET /whatsapp-status');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Access-Control-Allow-Origin', '*');

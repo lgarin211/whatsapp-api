@@ -3,6 +3,8 @@ const { MessageMedia } = require("whatsapp-web.js");
 const axios = require("axios");
 const { phoneNumberFormatter } = require("../../helpers/formatter");
 const { client, checkRegisteredNumber } = require("../whatsapp");
+const { log } = require("../../helpers/logger");
+
 
 module.exports = function (app) {
     /**
@@ -36,6 +38,7 @@ module.exports = function (app) {
         "/send-message",
         [body("number").notEmpty(), body("message").notEmpty()],
         async (req, res) => {
+            log(`Request: POST /send-message - Number: ${req.body.number}`);
             const errors = validationResult(req).formatWith(({ msg }) => {
                 return msg;
             });
@@ -105,6 +108,7 @@ module.exports = function (app) {
      *         description: Server error
      */
     app.post("/send-media", async (req, res) => {
+        log(`Request: POST /send-media - Number: ${req.body.number}, URL: ${req.body.file}`);
         const number = phoneNumberFormatter(req.body.number);
         const caption = req.body.caption;
         const fileUrl = req.body.file;
@@ -170,6 +174,7 @@ module.exports = function (app) {
      *         description: Server error
      */
     app.post("/send-image", async (req, res) => {
+        log(`Request: POST /send-image - Number: ${req.body.number}`);
         if (!req.files || !req.files.image) {
             return res.status(422).json({
                 status: false,

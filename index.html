@@ -1,81 +1,420 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-	<title>Whatsapp API by Ngekoding</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- This parts is optional, just for improve the styles -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Montserrat', sans-serif;
-      padding: 20px;
-    }
-    #app {
-      max-width: 500px;
-      margin: 20px auto;
-    }
-    #qrcode {
-      display: none; /* Showed when qr code received */
-      width: 100%;
-      margin: 10px 0;
-      border: 1px solid #efefef;
-      border-radius: 4px;
-    }
-    ul.logs {
-      max-height: 150px;
-      padding: 15px 15px 15px 30px;
-      margin-top: 5px;
-      border-radius: 4px;
-      overflow-y: auto;
-      background: #efefef;
-      color: #666;
-      font-size: 14px;
-    }
-    ul.logs li:first-child {
-      color: green;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp API Dashboard - Ngekoding</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #25d366;
+            --secondary: #128c7e;
+            --dark: #111b21;
+            --light: #f0f2f5;
+            --white: #ffffff;
+            --gray: #8696a0;
+            --accent: #569cd6;
+            --glass: rgba(255, 255, 255, 0.9);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, var(--secondary) 0%, var(--dark) 100%);
+            color: var(--white);
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-section {
+            margin-bottom: 30px;
+        }
+
+        .nav-section h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gray);
+            margin-bottom: 15px;
+            padding-left: 10px;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 12px 15px;
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 5px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        /* Main Content Styling */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 40px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .header-top h2 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 8px 20px;
+            background: var(--white);
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #ff4b2b;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-dot.online {
+            background: var(--primary);
+        }
+
+        /* Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h4 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .endpoint-list {
+            list-style: none;
+        }
+
+        .endpoint-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .endpoint-item:last-child {
+            border-bottom: none;
+        }
+
+        .method {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 6px;
+            border-radius: 4px;
+            color: white;
+        }
+
+        .method.get { background: #61affe; }
+        .method.post { background: #49cc90; }
+
+        .path {
+            font-family: monospace;
+            font-size: 14px;
+            color: #444;
+        }
+
+        /* QR & Logs section */
+        .bottom-sections {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 25px;
+        }
+
+        .qr-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        #qrcode {
+            width: 100%;
+            max-width: 250px;
+            margin: 20px auto;
+            border: 5px solid #fff;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .qr-placeholder {
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            color: var(--gray);
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 2px dashed #ddd;
+        }
+
+        .logs-card {
+            background: var(--dark);
+            color: #00ff41;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logs-content {
+            flex: 1;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            overflow-y: auto;
+            max-height: 300px;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+
+        .logs-content li {
+            list-style: none;
+            margin-bottom: 5px;
+            border-left: 2px solid #333;
+            padding-left: 10px;
+        }
+
+        .logs-content li:first-child {
+            color: #fff;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h1><span>🟢</span> WA-API</h1>
+        
+        <div class="nav-section">
+            <h3>Utama</h3>
+            <a href="/" class="nav-item active">Dashboard</a>
+            <a href="/api-docs" class="nav-item">API Docs (Swagger)</a>
+            <a href="/logs/browse" class="nav-item">Monitor Activity</a>
+        </div>
 
-	<div id="app">
-		<h1>Whatsapp API</h1>
-		<p>Powered by Ngekoding</p>
-		<img src="" alt="QR Code" id="qrcode">
-		<h3>Logs:</h3>
-		<ul class="logs"></ul>
-	</div>
+        <div class="nav-section">
+            <h3>Support</h3>
+            <a href="https://github.com/ngekoding" target="_blank" class="nav-item">Github</a>
+            <a href="#" class="nav-item">Documentation</a>
+        </div>
+        
+        <div style="margin-top: auto; font-size: 12px; color: var(--gray);">
+            v1.0.0 &bull; Ngekoding
+        </div>
+    </div>
 
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" crossorigin="anonymous"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" crossorigin="anonymous"></script>
-	<script>
-		$(document).ready(function() {
-			var socket = io();
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header-top">
+            <h2>System Dashboard</h2>
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                <span id="status-text">Connecting...</span>
+            </div>
+        </div>
 
-			socket.on('message', function(msg) {
-				$('.logs').prepend($('<li>').text(msg));
-			});
+        <div class="dashboard-grid">
+            <!-- Messaging -->
+            <div class="card">
+                <h4><span>✉️</span> Messaging</h4>
+                <div class="endpoint-list">
+                    <div class="endpoint-item">
+                        <span class="path">/send-message</span>
+                        <span class="method post">POST</span>
+                    </div>
+                    <div class="endpoint-item">
+                        <span class="path">/send-media</span>
+                        <span class="method post">POST</span>
+                    </div>
+                    <div class="endpoint-item">
+                        <span class="path">/send-image</span>
+                        <span class="method post">POST</span>
+                    </div>
+                </div>
+            </div>
 
-			socket.on('qr', function(src) {
-				$('#qrcode').attr('src', src);
-				$('#qrcode').show();
-			});
+            <!-- Groups -->
+            <div class="card">
+                <h4><span>👥</span> Group Features</h4>
+                <div class="endpoint-list">
+                    <div class="endpoint-item">
+                        <span class="path">/send-group-message</span>
+                        <span class="method post">POST</span>
+                    </div>
+                    <div class="endpoint-item">
+                        <span class="path">/send-group-media</span>
+                        <span class="method post">POST</span>
+                    </div>
+                    <div class="endpoint-item">
+                        <span class="path">/send-group-media-via-url</span>
+                        <span class="method post">POST</span>
+                    </div>
+                </div>
+            </div>
 
-			socket.on('ready', function(data) {
-				$('#qrcode').hide();
-				$('.logs').prepend($('<li>').text(data));
-			});
+            <!-- Monitoring -->
+            <div class="card">
+                <h4><span>🛡️</span> Administration</h4>
+                <div class="endpoint-list">
+                    <div class="endpoint-item">
+                        <span class="path">/clear-message</span>
+                        <span class="method post">POST</span>
+                    </div>
+                    <div class="endpoint-item">
+                        <span class="path">/whatsapp-status</span>
+                        <span class="method get">GET</span>
+                    </div>
+                    <div class="endpoint-item">
+                        <span class="path">/logs</span>
+                        <span class="method get">GET</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-			socket.on('authenticated', function(data) {
-				$('#qrcode').hide();
-				$('.logs').prepend($('<li>').text(data));
-			});
-		});
-	</script>
+        <div class="bottom-sections">
+            <!-- QR Section -->
+            <div class="qr-card">
+                <h4>Authentication QR</h4>
+                <p style="font-size: 14px; color: var(--gray);">Scan to connect</p>
+                <div id="qr-container">
+                    <div class="qr-placeholder" id="qr-placeholder">Waiting for QR...</div>
+                    <img src="" alt="QR Code" id="qrcode">
+                </div>
+            </div>
+
+            <!-- Socket Logs Section -->
+            <div class="logs-card">
+                <h4>Real-time Activity</h4>
+                <div class="logs-content">
+                    <ul class="logs"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(function() {
+            var socket = io();
+
+            socket.on('message', function(msg) {
+                $('.logs').prepend($('<li>').text(msg));
+            });
+
+            socket.on('qr', function(src) {
+                $('#qrcode').attr('src', src);
+                $('#qrcode').show();
+                $('#qr-placeholder').hide();
+            });
+
+            socket.on('ready', function(data) {
+                $('#qrcode').hide();
+                $('#qr-placeholder').text('WhatsApp is Ready!').show();
+                $('.logs').prepend($('<li>').text(data));
+                $('.status-dot').addClass('online');
+                $('#status-text').text('Online');
+            });
+
+            socket.on('authenticated', function(data) {
+                $('#qrcode').hide();
+                $('#qr-placeholder').text('Authenticated').show();
+                $('.logs').prepend($('<li>').text(data));
+                $('.status-dot').addClass('online');
+                $('#status-text').text('Authenticated');
+            });
+            
+            // Initial check for status
+            setTimeout(() => {
+                if ($('#status-text').text() === 'Connecting...') {
+                    $('#status-text').text('Disconnected');
+                }
+            }, 5000);
+        });
+    </script>
 </body>
 </html>

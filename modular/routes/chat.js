@@ -1,6 +1,8 @@
 const { body, validationResult } = require("express-validator");
 const { phoneNumberFormatter } = require("../../helpers/formatter");
 const { client, checkRegisteredNumber } = require("../whatsapp");
+const { log } = require("../../helpers/logger");
+
 
 module.exports = function (app) {
     /**
