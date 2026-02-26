@@ -1,7 +1,6 @@
 const { newBotClient } = require("../bot");
-const { sendEvent } = require("../sse");
 
-const client = newBotClient(sendEvent);
+const client = newBotClient();
 
 const checkRegisteredNumber = async function (number) {
     const isRegistered = await client.isRegisteredUser(number);

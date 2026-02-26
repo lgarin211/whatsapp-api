@@ -1,30 +1,17 @@
-const { registerSse, unregisterSse, sendLastDataSse } = require("../../sse");
 const { log } = require("../../helpers/logger");
-
 
 module.exports = function (app) {
     /**
      * @openapi
      * /whatsapp-status:
      *   get:
-     *     description: Get WhatsApp connection status via SSE
+     *     description: WhatsApp connection status endpoint (SSE disabled)
      *     responses:
      *       200:
-     *         description: SSE stream
+     *         description: Status message
      */
     app.get("/whatsapp-status", (req, res) => {
         log('Request: GET /whatsapp-status');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Connection', 'keep-alive');
-        res.flushHeaders(); // flush the headers to establish SSE with client
-
-        let id = registerSse(res);
-        sendLastDataSse(res);
-        // If client closes connection, stop sending events
-        res.on('close', () => {
-            unregisterSse(id);
-        });
+        res.json({ message: "SSE functionality has been removed for a leaner codebase. Use other API endpoints for status." });
     });
 };

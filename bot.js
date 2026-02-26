@@ -30,7 +30,7 @@ const getBrowserPath = () => {
     : '/usr/bin/google-chrome';
 };
 
-const newBotClient = (sendEvent) => {
+const newBotClient = (sendEvent = null) => {
   const browserPath = process.env.CHROME_PATH || getBrowserPath();
 
   const client = new Client({
