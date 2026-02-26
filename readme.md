@@ -87,5 +87,32 @@ sudo apt update && sudo apt install -y libatk1.0-0t64 libatk-bridge2.0-0t64 libc
 - Penambahan `.gitignore` untuk memastikan data sensitif dan file build tidak masuk ke dalam repository.
 - Pembersihan berkala file-file legacy yang tidak digunakan.
 
-### 6. Perbaikan Browser Launch (Bug Fix)
+### 6. Docker Deployment (Portable Image)
+Aplikasi ini dapat dijalankan dalam kontainer Docker untuk memastikan portabilitas tinggi dan kemudahan pemindahan antar server ("seperti disk").
+
+**Cara Build Image:**
+```bash
+npm run docker:build
+```
+
+**Cara Simpan Image ke File (Untuk dipindah antar server):**
+```bash
+npm run docker:save
+```
+Perintah ini akan menghasilkan file `whatsapp-api-image.tar`.
+
+**Cara Load & Jalankan di Server Baru:**
+1. Pindahkan file `.tar` ke server baru.
+2. Load image: `docker load < whatsapp-api-image.tar`
+3. Jalankan kontainer dengan persistence (Volume):
+   ```bash
+   docker run -d \
+     -p 8000:8000 \
+     -v $(pwd)/.wwebjs_auth:/app/.wwebjs_auth \
+     --name wa-api \
+     whatsapp-api
+   ```
+   *Catatan: Mapping volume `-v` sangat penting agar sesi login WhatsApp tidak hilang saat kontainer direstart.*
+
+### 7. Perbaikan Browser Launch (Bug Fix)
 Kami telah memperbaiki masalah di mana browser Chrome gagal dijalankan pada beberapa environment Linux (khususnya saat dijalankan sebagai `root`). Perbaikan meliputi penambahan flag stabilitas Puppeteer: `--disable-namespace-sandbox`, `--no-zygote`, dll.

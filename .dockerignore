@@ -1,0 +1,14 @@
+node_modules
+npm-debug.log
+logs
+.wwebjs_auth
+.wwebjs_cache
+.env
+.chrome_profile
+bin
+dist
+release
+*.tar
+*.zip
+.git
+.DS_Store
