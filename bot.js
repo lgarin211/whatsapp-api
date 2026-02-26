@@ -5,8 +5,8 @@ const newBotClient = (sendEvent) => {
   const client = new Client({
     restartOnAuthFail: true,
     puppeteer: {
-      executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-      headless: false,
+      executablePath: process.env.CHROME_PATH || (process.platform === 'win32' ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' : '/usr/bin/google-chrome'),
+      headless: true,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
@@ -14,9 +14,7 @@ const newBotClient = (sendEvent) => {
         "--disable-accelerated-2d-canvas",
         "--no-first-run",
         "--no-zygote",
-        // "--single-process", // <- this one doesn't work in Windows
         "--disable-gpu",
-        // "--proxy-server=proxy3.bri.co.id:1707",
       ],
     },
     authStrategy: new LocalAuth({

@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node app.js",
     "start:dev": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:bundle": "ncc build app.js -o dist",
+    "build:exe": "pkg dist/index.js --targets node18-win-x64,node18-linux-x64 --out-path bin"
   },
   "keywords": [
     "whatsapp-api",
@@ -32,5 +34,14 @@
     "@vercel/ncc": "^0.38.4",
     "nodemon": "^2.0.22",
     "pkg": "^5.8.1"
+  },
+  "pkg": {
+    "assets": [
+      "index.html",
+      "index-multiple-account.html",
+      "helpers/**/*",
+      "media/**/*",
+      "swagger.js"
+    ]
   }
 }
