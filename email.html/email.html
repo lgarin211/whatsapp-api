@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penyelarasan Standar Keamanan Integrasi BRIAPI</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: #333333;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+
+        .header {
+            background-color: #00529C;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header img {
+            max-width: 200px;
+            height: auto;
+        }
+
+        .content {
+            padding: 30px;
+            line-height: 1.6;
+        }
+
+        .footer {
+            background-color: #f9f9f9;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #777777;
+            border-top: 1px solid #eeeeee;
+        }
+
+        h2 {
+            color: #00529C;
+            font-size: 16px;
+            margin-top: 25px;
+            border-bottom: 2px solid #00529C;
+            padding-bottom: 5px;
+        }
+
+        p {
+            margin: 15px 0;
+        }
+
+        ul,
+        ol {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .contact-info {
+            background-color: #eef6ff;
+            padding: 15px;
+            border-left: 4px solid #00529C;
+            margin-top: 30px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="content">
+            <p>Kepada Yth.<br>
+                <strong>Pimpinan / Manajemen Perusahaan Mitra BRIAPI</strong><br>
+                di Tempat
+            </p>
+
+            <p>Dengan hormat,</p>
+
+            <p>Kami menyampaikan apresiasi atas kolaborasi yang telah terjalin dengan baik selama ini terkait dengan
+                kerja sama integrasi dan pemanfaatan layanan <em>Application Programming Interface</em> PT Bank Rakyat
+                Indonesia (Persero), Tbk (“BRIAPI”).</p>
+
+            <p>Seiring dengan perkembangan ekosistem digital serta peningkatan volume dan kompleksitas transaksi, BRI
+                secara berkelanjutan melakukan penguatan tata kelola dan standardisasi keamanan integrasi API sebagai
+                bagian dari program peningkatan kualitas layanan dan manajemen risiko tahun 2026.</p>
+
+            <p>Dalam rangka menjaga keamanan, keandalan, serta kesinambungan layanan kepada nasabah dan mitra bisnis ke
+                depannya, kami mengimbau Mitra BRI API untuk melakukan peninjauan serta penguatan aspek tata kelola
+                sistem dan pengamanan koneksi API. Langkah ini sejalan dengan prinsip <em>prudential banking</em>,
+                penerapan manajemen risiko operasional dan risiko teknologi informasi, serta pemenuhan standar keamanan
+                informasi dan perlindungan data pribadi sesuai ketentuan yang berlaku.</p>
+
+            <p>Adapun beberapa hal yang perlu menjadi perhatian dan tindak lanjut dari seluruh Mitra BRIAPI adalah
+                sebagai berikut:</p>
+
+            <h2>1. Pengelolaan PIC BRIAPI</h2>
+            <p>Untuk memastikan kelancaran koordinasi operasional dan pengelolaan risiko:</p>
+            <ul>
+                <li>Mitra agar memastikan data PIC yang terdaftar untuk kerja sama BRIAPI selalu mutakhir dan dapat
+                    dihubungi.</li>
+                <li>Mitra agar menginformasikan kepada tim BRIAPI dengan segera (selambat-lambatnya 10 hari kerja)
+                    apabila terdapat perubahan, termasuk apabila:
+                    <ol type="i">
+                        <li>Pengunduran diri PIC;</li>
+                        <li>Penggantian PIC;</li>
+                        <li>Perubahan data PIC (sekurang-kurangnya nama, email, nomor handphone).</li>
+                    </ol>
+                </li>
+            </ul>
+
+            <h2>2. Pengelolaan Keamanan Sistem</h2>
+            <p>Dalam rangka menjaga ketahanan sistem yang terintegrasi dengan BRIAPI, Mitra diharapkan untuk:</p>
+            <ul>
+                <li>Melakukan <em>Vulnerability Assessment/Penetration Test</em> secara berkala (setidaknya 1 kali dalam
+                    1 tahun) sebagai bagian dari siklus pengamanan sistem.</li>
+                <li>Memastikan setiap temuan kerentanan ditindaklanjuti dan ditutup sesuai tingkat risikonya.</li>
+                <li>Memastikan sistem dan aplikasi yang terintegrasi dengan BRIAPI selalu diperbarui dengan
+                    <em>patch</em> keamanan terbaru.
+                </li>
+                <li>Memastikan efektivitas penerapan <em>Multi Factor Authentication</em> (MFA) untuk akses
+                    administratif dan sistem yang terintegrasi dengan BRIAPI.</li>
+                <li>Memastikan ketersediaan dan pembaruan berkala antimalware dan/atau antivirus dengan fitur
+                    <em>real-time protection</em> serta mekanisme deteksi ancaman terkini.
+                </li>
+                <li>Memastikan sistem dan infrastruktur berada dalam lingkungan yang terlindungi (firewall, WAF,
+                    IDS/IPS).</li>
+                <li>Memastikan endpoint API hanya dapat diakses melalui protokol HTTPS (minimal TLS 1.2).</li>
+            </ul>
+
+            <h2>3. Pengamanan Kredensial dan Akses BRIAPI</h2>
+            <ul>
+                <li>Menjaga kerahasiaan email dan password akses portal BRIAPI.</li>
+                <li>Menjaga kerahasiaan kredensial BRIAPI (<em>client id</em> dan <em>client secret</em>) dengan
+                    memastikan penyimpanan di environment yang aman and tidak di-<em>hardcode</em>.</li>
+                <li>Berkoordinasi dengan BRI untuk pelaksanaan perubahan kredensial BRIAPI periode tahun 2026.</li>
+                <li>Mempertahankan prinsip <em>least privilege</em> dan pemisahan <em>service account</em>.</li>
+                <li>Menginformasikan kepada PIC BRI apabila terdapat perubahan IP address yang terhubung.</li>
+            </ul>
+
+            <h2>4. Fraud Detection dan Pengelolaan Insiden Siber</h2>
+            <ul>
+                <li>Memastikan pencegahan dan deteksi fraud (<em>fraud detection system</em>).</li>
+                <li>Memastikan pembaruan informasi atas PIC antifraud yang dapat dihubungi 24/7.</li>
+                <li>Melakukan monitoring dan peninjauan berkala terhadap log aktivitas.</li>
+                <li>Menyampaikan pemberitahuan awal kepada BRI secara segera (paling lambat 1 x 24 jam) apabila terjadi
+                    insiden siber atau kebocoran data.</li>
+                <li>Pemberitahuan awal sekurang-kurangnya memuat: Ringkasan insiden, Potensi dampak, Jenis sistem/data
+                    terdampak, dan Langkah mitigasi awal.</li>
+            </ul>
+
+            <div class="contact-info">
+                <p>Ketentuan ini merupakan bagian dari penguatan <em>governance</em> integrasi API dan menjadi referensi
+                    dalam evaluasi.</p>
+                <p>Apabila diperlukan, BRI siap melakukan sesi koordinasi lanjutan guna memastikan implementasi berjalan
+                    optimal.</p>
+                <p>
+                    <strong>Email:</strong> <a
+                        href="mailto:partnership.briapi@brilian.bri.co.id">partnership.briapi@brilian.bri.co.id</a><br>
+                    <strong>No HP:</strong> 0851-6702-4179
+                </p>
+            </div>
+
+            <p>Demikian kami sampaikan. Atas perhatian dan kerja sama yang baik, kami ucapkan terima kasih.</p>
+        </div>
+
+        <div class="footer">
+            <p class="text-gray-800" align="justify"
+                style="font-size: 10px; line-height: 15px; color: #2d3748; width: 100%; margin: 0 0 10px;">
+                PERHATIAN: E-mail ini (termasuk
+                seluruh lampirannya, bila ada)
+                mungkin memuat data/informasi
+                yang bersifat rahasia dan hanya
+                ditujukan kepada penerima yang
+                tercantum di atas. Jika Anda
+                bukan penerima yang dituju, maka
+                Anda tidak diperkenankan untuk
+                memanfaatkan,
+                menyebarkan, mendistribusikan,
+                atau mengalih-mediakan dalam
+                bentuk apapun termasuk cetak
+                , baik sebagian atau seluruhnya
+                atas e-mail ini beserta seluruh
+                lampirannya. Mohon
+                kerjasamanya untuk segera
+                memberitahukan PT Bank Rakyat
+                Indonesia (Persero) Tbk di
+                alamat
+                email yang tercantum di atas
+                serta segera menghapus e-mail
+                ini berikut seluruh lampirannya.
+                Semua pendapat yang ada dalam
+                e-mail ini merupakan pendapat
+                pribadi dari pengirim yang
+                bersangkutan d a n terbatas pada
+                konteks edukasi layanan yang
+                sifatnya spesifik sesuai
+                ketentuan undang-undang, serta
+                tidak secara serta merta
+                mencerminkan pandangan PT Bank
+                BRI Rakyat Indonesia (Persero)
+                Tbk., kecuali telah terdapat
+                kesepakatan antara pengirim dan
+                penerima bahwa e-mail ini
+                termasuk salah satu bentuk
+                komunikasi kedinasan yang dapat
+                diterima oleh kedua pihak.
+                Penerima email ini menyatakan
+                memahami bahwa pelanggaran atau
+                penyalahgunaan atas sebagian
+                atau seluruh informasi dalam
+                email ini berikut lampirannya,
+                mungkin saja menimbulkan
+                kerugian dan dapat di proses
+                berdasarkan ketentuan hukum yang
+                berlaku baik secara perdata
+                maupun pidana.
+            </p>
+            <p class="text-gray-800" align="justify"
+                style="font-size: 10px; line-height: 15px; color: #2d3748; width: 100%; margin: 0 0 30px;">
+                CAUTION: This e-mail (including
+                its attachments, if any) may
+                contain confidential
+                data/information
+                and is only addressed to the
+                recipients listed above. If you
+                are not the intended recipient,
+                then
+                you are not allowed to use,
+                disseminate, distribute, or
+                reformat in any form, including
+                printing,
+                either partly or entirely,
+                against this e-mail and its
+                attachments. Please have
+                cooperation to
+                immediately notify PT Bank
+                Rakyat Indonesia (Persero) Tbk
+                through email address listed
+                above
+                and immediately delete this
+                e-mail along with all
+                attachments. All opinions
+                contained in this e-mail
+                are considered as personal
+                opinions of the sender and are
+                limited to the context of
+                service
+                education which are specific in
+                nature according to the
+                applicable laws, and shall not
+                necessarily
+                reflect the views of PT Bank
+                Rakyat Indonesia (Persero) Tbk.,
+                unless there has been an
+                agreement between the sender and
+                the recipient that this e-mail
+                is a form of official
+                communication which may be
+                accepted by the parties. The
+                recipient of this email states
+                that
+                he/she understands that any
+                violation or misuse of some or
+                all of the information in this
+                email
+                and its attachments, may cause
+                damage and may be processed
+                according to applicable laws,
+                both in civil and criminal
+                matters.
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>
