@@ -76,7 +76,16 @@ Logika aplikasi yang sebelumnya menumpuk di `app.js` telah dipisah menjadi beber
 Halaman utama (`/`) telah diperbarui dengan antarmuka yang modern untuk memudahkan navigasi ke endpoint API, dokumentasi Swagger, dan sistem log.
 
 ### 4. Portable Release (Executable)
-Kami telah menyediakan opsi build executable untuk **Linux** dan **Windows** di folder `release/`. 
+Meskipun browser Chrome sudah disertakan, sistem operasi Linux (Host) Anda tetap memerlukan beberapa library dasar agar Chrome bisa berjalan.
+
+**Prasyarat di Server Linux Baru (Headless):**
+Jika Anda menggunakan server Linux yang baru diinstal (misalnya Ubuntu atau Debian), jalankan perintah ini terlebih dahulu untuk menginstal library pendukung:
+```bash
+sudo apt update && sudo apt install -y libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxext6 libxfixes3 libxrandr2 libgbm1 libasound2
+```
+
+**Langkah Instalasi:**
+1. Kami telah menyediakan opsi build executable untuk **Linux** dan **Windows** di folder `release/`. 
 - **Bundled Chrome**: Browser Chrome sudah disertakan di dalam paket rilis.
 - **Catatan Penting**: Karena batasan ukuran file di GitHub, file binary besar telah dipecah menjadi beberapa bagian (`.part_*`).
 - **Cara Menggabungkan Kembali**: 
