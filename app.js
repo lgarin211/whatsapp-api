@@ -1,6 +1,7 @@
 const express = require("express");
 const http = require("http");
 const fileUpload = require("express-fileupload");
+const path = require("path");
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger');
 const initModularRoutes = require("./modular");
@@ -43,9 +44,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
  *         description: Returns the index.html page.
  */
 app.get("/", (req, res) => {
-  res.sendFile("index.html", {
-    root: __dirname,
-  });
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
 // Initialize modular routes

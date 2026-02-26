@@ -1,11 +1,38 @@
 const { Client, LocalAuth, NoAuth, LocalWebCacheOptions } = require("whatsapp-web.js");
 const qrcodeTerm = require("qrcode-terminal");
+const path = require("path");
+const fs = require("fs");
+
+const getBrowserPath = () => {
+  const isPkg = typeof process.pkg !== 'undefined';
+  const execDir = isPkg ? path.dirname(process.execPath) : process.cwd();
+
+  // Potential locations for portable browser
+  const locations = [
+    path.join(execDir, 'browsers'),
+    path.join(execDir, 'bin', 'browsers'),
+    path.join(__dirname, 'bin', 'browsers')
+  ];
+
+  const platform = process.platform === 'win32' ? 'win' : 'linux';
+  const binary = process.platform === 'win32' ? 'chrome.exe' : 'chrome';
+
+  for (const loc of locations) {
+    const fullPath = path.join(loc, platform, binary);
+    if (fs.existsSync(fullPath)) return fullPath;
+  }
+
+  // Fallback to system chrome
+  return process.platform === 'win32'
+    ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+    : '/usr/bin/google-chrome';
+};
 
 const newBotClient = (sendEvent) => {
   const client = new Client({
     restartOnAuthFail: true,
     puppeteer: {
-      executablePath: process.env.CHROME_PATH || '/home/ubuntu/.cache/puppeteer/chrome/linux-144.0.7559.96/chrome-linux64/chrome',
+      executablePath: process.env.CHROME_PATH || getBrowserPath(),
       headless: true,
       args: [
         "--no-sandbox",
@@ -18,7 +45,8 @@ const newBotClient = (sendEvent) => {
       ],
     },
     authStrategy: new LocalAuth({
-      clientId: 'whatsapp-session'
+      clientId: 'whatsapp-session',
+      dataPath: path.join(process.cwd(), '.wwebjs_auth')
     }),
     webVersion: "2.2405.4"
   });

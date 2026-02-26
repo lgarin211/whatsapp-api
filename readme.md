@@ -58,3 +58,32 @@ And we decided (for this example) to use time as the filename, because the media
 ## Support Me
 
 You can make a support for this work by [DONATING](./DONATE.md). Thank you.
+
+---
+
+## Update dari Agustinus
+
+Proyek ini telah mengalami beberapa pembaruan besar untuk meningkatkan struktur, transparansi, dan kemudahan deployment:
+
+### 1. Modularisasi Kode
+Logika aplikasi yang sebelumnya menumpuk di `app.js` telah dipisah menjadi beberapa modul di folder `modular/`. Hal ini membuat pemeliharaan kode menjadi jauh lebih mudah dan struktur aplikasi lebih bersih.
+
+### 2. Sistem Logging & Monitoring
+- **Automated Logs**: Sekarang setiap request dan aktivitas client dicatat otomatis ke dalam folder `logs/` dengan struktur folder berdasarkan tanggal dan jam (`logs/YYYY-MM-DD/HH/`).
+- **Log Monitoring UI**: Tersedia endpoint `/logs` untuk memantau aktivitas sistem secara real-time langsung dari browser.
+
+### 3. Dashboard Interaktif
+Halaman utama (`/`) telah diperbarui dengan antarmuka yang modern untuk memudahkan navigasi ke endpoint API, dokumentasi Swagger, dan sistem log.
+
+### 4. Portable Release (Executable)
+Kami telah menyediakan opsi build executable untuk **Linux** dan **Windows** di folder `release/`. 
+- **Bundled Chrome**: Browser Chrome sudah disertakan di dalam paket rilis.
+- **Catatan Penting**: Karena batasan ukuran file di GitHub, file binary besar telah dipecah menjadi beberapa bagian (`.part_*`).
+- **Cara Menggabungkan Kembali**: 
+  - Di Linux: Jalankan `bash restore.sh` di dalam folder `release`.
+  - Di Windows: Jalankan `restore.bat` di dalam folder `release`.
+- **Zero Dependencies**: Setelah digabungkan, cukup jalankan binary-nya dan aplikasi siap digunakan.
+
+### 5. Keamanan & Kebersihan Repo
+- Penambahan `.gitignore` untuk memastikan data sensitif dan folder besar seperti `node_modules` tidak masuk ke dalam repository.
+- Pembersihan berkala cache sistem selama proses build untuk menghemat ruang disk.
