@@ -79,10 +79,11 @@ Halaman utama (`/`) telah diperbarui dengan antarmuka yang modern untuk memudahk
 Meskipun browser Chrome sudah disertakan, sistem operasi Linux (Host) Anda tetap memerlukan beberapa library dasar agar Chrome bisa berjalan.
 
 **Prasyarat di Server Linux Baru (Headless):**
-Jika Anda menggunakan server Linux yang baru diinstal (misalnya Ubuntu atau Debian), jalankan perintah ini terlebih dahulu untuk menginstal library pendukung:
+Jika Anda menggunakan server Linux yang baru diinstal (misalnya Ubuntu 24.04+), jalankan perintah ini terlebih dahulu untuk menginstal library pendukung:
 ```bash
-sudo apt update && sudo apt install -y libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxext6 libxfixes3 libxrandr2 libgbm1 libasound2
+sudo apt update && sudo apt install -y libatk1.0-0t64 libatk-bridge2.0-0t64 libcups2t64 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxext6 libxfixes3 libxrandr2 libgbm1 libasound2t64
 ```
+*(Catatan: Jika Anda menggunakan Ubuntu versi lebih lama, hapus akhiran `t64` pada nama paket di atas).*
 
 **Langkah Instalasi:**
 1. Kami telah menyediakan opsi build executable untuk **Linux** dan **Windows** di folder `release/`. 
