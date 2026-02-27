@@ -1,23 +1,25 @@
 const { newBotClient } = require("../bot");
 
-const client = newBotClient();
+let sendEventBridge = null;
+
+// Initialize the client with a wrapper for sendEvent
+const client = newBotClient((event, data) => {
+    if (sendEventBridge) {
+        sendEventBridge(event, data);
+    }
+});
+
+const init = (sendEvent) => {
+    sendEventBridge = sendEvent;
+};
 
 const checkRegisteredNumber = async function (number) {
     const isRegistered = await client.isRegisteredUser(number);
     return isRegistered;
 };
 
-const findGroupByName = async function (name) {
-    const group = await client.getChats().then((chats) => {
-        return chats.find(
-            (chat) => chat.isGroup && chat.name.toLowerCase() == name.toLowerCase()
-        );
-    });
-    return group;
-};
-
 module.exports = {
     client,
-    checkRegisteredNumber,
-    findGroupByName,
+    init,
+    checkRegisteredNumber
 };

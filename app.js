@@ -47,8 +47,20 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
+const io = require("socket.io")(server);
+
+// Event bridge to communicate with frontend
+const sendEvent = (event, data) => {
+  io.emit(event, data);
+};
+
+// Handle socket connections
+io.on("connection", (socket) => {
+  console.log("A user connected via Socket.io");
+});
+
 // Initialize modular routes
-initModularRoutes(app);
+initModularRoutes(app, sendEvent);
 
 server.listen(port, function () {
   console.log("App running on *: " + port);
