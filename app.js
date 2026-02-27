@@ -11,6 +11,7 @@ const axios = require("axios");
 const crypto = require("crypto")
 const { newBotClient } = require("./bot");
 const { sendEvent, registerSse, unregisterSse, sendLastDataSse } = require("./sse");
+const logger = require("./logger");
 
 
 const port = process.env.PORT || 8001;
@@ -100,7 +101,7 @@ app.post(
     const mediaPath = req.body.mediaPath;
 
     fs.readFile(mediaPath, (err, data) => {
-      if (err) console.error(err);
+      if (err) logger.error(err);
 
       // Tentukan tipe mime gambar Anda
       const mimetype = 'image/jpg'; // Ganti dengan tipe mime yang sesuai dengan gambar Anda
@@ -109,7 +110,7 @@ app.post(
       const media = new MessageMedia(mimetype, data.toString('base64'), "Media");
 
       // const media = new MessageMedia(mimetype, attachment, 'Media');
-      console.log("number:", number);
+      logger.info("number: %s", number);
       client
         .sendMessage(number, media, { caption: caption })
         .then((response) => {
@@ -118,7 +119,7 @@ app.post(
             response: response,
           });
 
-          console.log("file:", mediaPath, " ,success deleted");
+          logger.info("file: %s, success deleted", mediaPath);
         });
     })
   }
@@ -254,15 +255,15 @@ app.post(
     // });
 
     // const media = new MessageMedia(mimetype, attachment, 'Media');
-    console.log("number:", number);
+    logger.info("number: %s", number);
     client
       .sendMessage(number, media, {
         caption: caption,
       })
       .then((response) => {
         fs.unlink(fileUrl, (err) => {
-          if (err) console.error(err);
-          console.log("file:", fileUrl, " ,success deleted");
+          if (err) logger.error(err);
+          logger.info("file: %s, success deleted", fileUrl);
         });
         res.status(200).json({
           status: true,
@@ -270,7 +271,7 @@ app.post(
         });
       })
       .catch((err) => {
-        console.error(err);
+        logger.error(err);
         res.status(500).json({
           status: false,
           response: err,
@@ -325,15 +326,15 @@ app.post(
     });
 
     const media = new MessageMedia(mimetype, attachment, 'Media');
-    console.log("number:", number);
+    logger.info("number: %s", number);
     client
       .sendMessage(number, media, {
         caption: caption,
       })
       .then((response) => {
         fs.unlink(fileUrl, (err) => {
-          if (err) console.error(err);
-          console.log("file:", fileUrl, " ,success deleted");
+          if (err) logger.error(err);
+          logger.info("file: %s, success deleted", fileUrl);
         });
         res.status(200).json({
           status: true,
@@ -460,5 +461,5 @@ app.post("/clear-message", [body("number").notEmpty()], async (req, res) => {
 });
 
 server.listen(port, function () {
-  console.log("App running on *: " + port);
+  logger.info("App running on *: %s", port);
 });

@@ -1,0 +1,9 @@
+services:
+  whatsapp-api:
+    build: .
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./logs:/app/logs
+      - ./.wwebjs_cache:/app/.wwebjs_cache
+    restart: always

@@ -1,0 +1,8 @@
+node_modules
+logs/*.log
+.wwebjs_cache
+.wwebjs_auth
+*.backu
+*.backup
+app_20240425.js
+.env
