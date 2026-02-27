@@ -6,9 +6,9 @@ RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
     ca-certificates \
-    libatk1.0-0t64 \
-    libatk-bridge2.0-0t64 \
-    libcups2t64 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
     libdrm2 \
     libxkbcommon0 \
     libxcomposite1 \
@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
     libxfixes3 \
     libxrandr2 \
     libgbm1 \
-    libasound2t64 \
+    libasound2 \
     libcairo2 \
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y \
 
 # Fix for Puppeteer not finding Chrome in the container
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV CHROME_PATH=/usr/bin/google-chrome
 
 # Install Google Chrome Stable

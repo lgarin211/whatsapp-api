@@ -10,13 +10,12 @@ yarn-debug.log*
 # Build artifacts
 bin/
 dist/
+release/
 release.zip
+*.tar
+*.image
 
-# Reassembled large binaries (should only store .part_* files)
-release/whatsapp-api-linux
-release/whatsapp-api-win.exe
-release/browsers/linux/chrome
-release/browsers/win/chrome.dll
+# Reassembled large binaries
 whatsapp-api-linux
 whatsapp-api-win.exe
 .chrome_profile/
