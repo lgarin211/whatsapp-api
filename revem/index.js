@@ -212,6 +212,11 @@ app.post(
                 return res.status(400).json({ status: false, message: 'Group ID or Name is required' });
             }
 
+            // Ensure the chatId is formatted correctly as a group ID
+            if (chatId && !chatId.includes('@g.us')) {
+                chatId = `${chatId}@g.us`;
+            }
+
             await client.sendMessage(chatId, message);
             logger.info('Outgoing group message sent', {
                 type: 'group_text',
