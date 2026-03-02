@@ -25,7 +25,7 @@
                                 "properties": {
                                     "number": {
                                         "type": "string",
-                                        "description": "The recipient's phone number (e.g., 08123456789 or 628123456789)"
+                                        "description": "The recipient's phone number, exact contact name, or exact group name."
                                     },
                                     "message": {
                                         "type": "string",
@@ -120,7 +120,7 @@
                                 "properties": {
                                     "number": {
                                         "type": "string",
-                                        "description": "The recipient's phone number"
+                                        "description": "The recipient's phone number, exact contact name, or exact group name."
                                     },
                                     "file": {
                                         "type": "string",
@@ -156,57 +156,10 @@
                 }
             }
         },
-        "/send-group-message": {
-            "post": {
-                "summary": "Send a message to a group",
-                "description": "Sends a text message to a WhatsApp group by its ID or exact Name.",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "description": "The exact Group Name"
-                                    },
-                                    "message": {
-                                        "type": "string",
-                                        "description": "The text message to send"
-                                    }
-                                },
-                                "required": [
-                                    "name",
-                                    "message"
-                                ]
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Group message sent!"
-                    },
-                    "400": {
-                        "description": "Bad Request (Missing fields)"
-                    },
-                    "422": {
-                        "description": "Group not found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    },
-                    "503": {
-                        "description": "WhatsApp client is not ready"
-                    }
-                }
-            }
-        },
         "/clear-message": {
             "post": {
                 "summary": "Clear chat history",
-                "description": "Clears the chat history with a specific phone number.",
+                "description": "Clears the chat history with a specific phone number, contact name, or group name.",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -216,7 +169,7 @@
                                 "properties": {
                                     "number": {
                                         "type": "string",
-                                        "description": "The phone number to clear chat with"
+                                        "description": "The phone number, contact name, or group name to clear chat with"
                                     }
                                 },
                                 "required": [

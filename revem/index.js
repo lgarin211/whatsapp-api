@@ -58,6 +58,32 @@ const findGroupByName = async function (name) {
     return group;
 };
 
+// Universal target resolver (Group Name, Contact Name, or Phone Number)
+const resolveTargetId = async function (targetInput) {
+    if (!targetInput) return null;
+
+    // 1. Check if the target is an exact match for an active Chat (Group or Contact)
+    const chats = await client.getChats();
+    const matchedChat = chats.find(
+        (chat) => chat.name && chat.name.toLowerCase() === targetInput.toLowerCase()
+    );
+    if (matchedChat) return matchedChat.id._serialized;
+
+    // 2. Check if the target is an exact match for a saved Contact
+    const contacts = await client.getContacts();
+    const matchedContact = contacts.find(
+        (contact) => contact.name && contact.name.toLowerCase() === targetInput.toLowerCase()
+    );
+    if (matchedContact) return matchedContact.id._serialized;
+
+    // 3. Fallback: treat as a phone number
+    const formattedNumber = phoneNumberFormatter(targetInput);
+    const isRegistered = await checkRegisteredNumber(formattedNumber);
+    if (isRegistered) return formattedNumber;
+
+    return null; // Target not found or not registered
+};
+
 // Setup Swagger UI
 app.use('/web/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
@@ -108,7 +134,7 @@ app.post(
             return res.status(400).json({ status: false, message: errors.array()[0].msg });
         }
 
-        const number = phoneNumberFormatter(req.body.number);
+        const targetInput = req.body.number;
         const message = req.body.message;
 
         if (!isClientReady) {
@@ -116,15 +142,15 @@ app.post(
         }
 
         try {
-            const isRegistered = await checkRegisteredNumber(number);
-            if (!isRegistered) {
-                return res.status(422).json({ status: false, message: 'Number is not registered' });
+            const chatId = await resolveTargetId(targetInput);
+            if (!chatId) {
+                return res.status(422).json({ status: false, message: `Target '${targetInput}' could not be resolved as a phone number, contact, or group.` });
             }
 
-            await client.sendMessage(number, message);
+            await client.sendMessage(chatId, message);
             logger.info('Outgoing message sent', {
                 type: 'text',
-                recipient: number,
+                recipient: chatId,
                 content: message,
                 category: 'API'
             });
@@ -149,7 +175,7 @@ app.post(
             return res.status(400).json({ status: false, message: errors.array()[0].msg });
         }
 
-        const number = phoneNumberFormatter(req.body.number);
+        const targetInput = req.body.number;
         const fileUrl = req.body.file;
         const caption = req.body.caption || '';
 
@@ -158,15 +184,20 @@ app.post(
         }
 
         try {
+            const chatId = await resolveTargetId(targetInput);
+            if (!chatId) {
+                return res.status(422).json({ status: false, message: `Target '${targetInput}' could not be resolved as a phone number, contact, or group.` });
+            }
+
             const response = await axios.get(fileUrl, { responseType: 'arraybuffer' });
             const mimetype = response.headers['content-type'];
             const attachment = response.data.toString('base64');
             const media = new MessageMedia(mimetype, attachment, 'Media');
 
-            await client.sendMessage(number, media, { caption });
+            await client.sendMessage(chatId, media, { caption });
             logger.info('Outgoing media sent', {
                 type: 'media',
-                recipient: number,
+                recipient: chatId,
                 caption: caption,
                 fileUrl: fileUrl,
                 category: 'API'
@@ -195,7 +226,7 @@ app.post(
             return res.status(400).json({ status: false, message: 'No file was uploaded. Ensure field name is "file".' });
         }
 
-        const number = phoneNumberFormatter(req.body.number);
+        const targetInput = req.body.number;
         const uploadedFile = req.files.file;
         const caption = req.body.caption || '';
         const uploadPath = path.join(__dirname, 'uploads', uploadedFile.name);
@@ -205,14 +236,19 @@ app.post(
         }
 
         try {
+            const chatId = await resolveTargetId(targetInput);
+            if (!chatId) {
+                return res.status(422).json({ status: false, message: `Target '${targetInput}' could not be resolved as a phone number, contact, or group.` });
+            }
+
             await uploadedFile.mv(uploadPath);
 
             const media = MessageMedia.fromFilePath(uploadPath);
-            await client.sendMessage(number, media, { caption });
+            await client.sendMessage(chatId, media, { caption });
 
             logger.info('Outgoing local media sent', {
                 type: 'local_media',
-                recipient: number,
+                recipient: chatId,
                 caption: caption,
                 fileName: uploadedFile.name,
                 category: 'API'
@@ -233,60 +269,20 @@ app.post(
     }
 );
 
-// Send message to group
-app.post(
-    '/send-group-message',
-    [
-        body('name').notEmpty().withMessage('Group Name is required'),
-        body('message').notEmpty().withMessage('Message is required'),
-    ],
-    async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ status: false, message: errors.array()[0].msg });
-        }
-
-        const groupName = req.body.name;
-        const message = req.body.message;
-
-        if (!isClientReady) {
-            return res.status(503).json({ status: false, message: 'WhatsApp client is not ready' });
-        }
-
-        try {
-            const group = await findGroupByName(groupName);
-            if (!group) {
-                return res.status(422).json({ status: false, message: 'Group not found' });
-            }
-
-            const chatId = group.id._serialized;
-
-            await client.sendMessage(chatId, message);
-            logger.info('Outgoing group message sent', {
-                type: 'group_text',
-                recipient: chatId,
-                groupName: groupName,
-                content: message,
-                category: 'API'
-            });
-            res.status(200).json({ status: true, message: 'Group message sent!' });
-        } catch (error) {
-            logger.error('Error in /send-group-message:', error);
-            res.status(500).json({ status: false, message: error.message });
-        }
-    }
-);
-
 // Clear message
 app.post('/clear-message', async (req, res) => {
-    const number = phoneNumberFormatter(req.body.number);
+    const targetInput = req.body.number;
 
     if (!isClientReady) {
         return res.status(503).json({ status: false, message: 'WhatsApp client is not ready' });
     }
 
     try {
-        const chat = await client.getChatById(number);
+        const chatId = await resolveTargetId(targetInput);
+        if (!chatId) {
+            return res.status(422).json({ status: false, message: `Target '${targetInput}' could not be resolved.` });
+        }
+        const chat = await client.getChatById(chatId);
         await chat.clearMessages();
         res.status(200).json({ status: true, message: 'Chat cleared' });
     } catch (error) {
