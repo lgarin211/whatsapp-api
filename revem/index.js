@@ -19,7 +19,7 @@ let isClientReady = false;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(fileUpload({ debug: false }));
+app.use(fileUpload({ createParentPath: true, debug: false }));
 
 // Initialize WhatsApp Client
 const client = newBotClient((event, data) => {
@@ -174,6 +174,60 @@ app.post(
             res.status(200).json({ status: true, message: 'Media sent!' });
         } catch (error) {
             logger.error('Error in /send-media:', error);
+            res.status(500).json({ status: false, message: error.message });
+        }
+    }
+);
+
+// Send local media (file upload)
+app.post(
+    '/send-local-media',
+    [
+        body('number').notEmpty().withMessage('Number is required'),
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ status: false, message: errors.array()[0].msg });
+        }
+
+        if (!req.files || Object.keys(req.files).length === 0 || !req.files.file) {
+            return res.status(400).json({ status: false, message: 'No file was uploaded. Ensure field name is "file".' });
+        }
+
+        const number = phoneNumberFormatter(req.body.number);
+        const uploadedFile = req.files.file;
+        const caption = req.body.caption || '';
+        const uploadPath = path.join(__dirname, 'uploads', uploadedFile.name);
+
+        if (!isClientReady) {
+            return res.status(503).json({ status: false, message: 'WhatsApp client is not ready' });
+        }
+
+        try {
+            await uploadedFile.mv(uploadPath);
+
+            const media = MessageMedia.fromFilePath(uploadPath);
+            await client.sendMessage(number, media, { caption });
+
+            logger.info('Outgoing local media sent', {
+                type: 'local_media',
+                recipient: number,
+                caption: caption,
+                fileName: uploadedFile.name,
+                category: 'API'
+            });
+
+            // Clean up: delete the file after sending
+            fs.unlinkSync(uploadPath);
+
+            res.status(200).json({ status: true, message: 'Local media sent!' });
+        } catch (error) {
+            logger.error('Error in /send-local-media:', error);
+            // Attempt to clean up even if sending fails
+            if (fs.existsSync(uploadPath)) {
+                fs.unlinkSync(uploadPath);
+            }
             res.status(500).json({ status: false, message: error.message });
         }
     }

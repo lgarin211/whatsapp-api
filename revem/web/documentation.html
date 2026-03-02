@@ -164,6 +164,14 @@
     "caption": "Check out this image!"
 }</pre>
 
+            <h3>Sending Local Media (Upload)</h3>
+            <p>Upload a file directly from your computer/server via <code>multipart/form-data</code>.</p>
+            <pre>POST /send-local-media
+Content-Type: multipart/form-data
+- number: "08123456789"
+- caption: "My uploaded file"
+- file: (file attachment)</pre>
+
             <h3>Group Messaging</h3>
             <p>Sends messages to a group using the exact Group Name. The system will automatically search your chats to
                 find the correct group ID.</p>

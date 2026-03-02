@@ -107,6 +107,55 @@
                 }
             }
         },
+        "/send-local-media": {
+            "post": {
+                "summary": "Send media via local file upload",
+                "description": "Uploads a media file (image, video, document) and sends it to a specific phone number.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "number": {
+                                        "type": "string",
+                                        "description": "The recipient's phone number"
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "description": "The actual file to upload and send"
+                                    },
+                                    "caption": {
+                                        "type": "string",
+                                        "description": "Optional text caption for the media"
+                                    }
+                                },
+                                "required": [
+                                    "number",
+                                    "file"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Local media sent!"
+                    },
+                    "400": {
+                        "description": "Bad Request (Missing fields)"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    },
+                    "503": {
+                        "description": "WhatsApp client is not ready"
+                    }
+                }
+            }
+        },
         "/send-group-message": {
             "post": {
                 "summary": "Send a message to a group",
