@@ -53,7 +53,7 @@ const checkRegisteredNumber = async function (number) {
 const findGroupByName = async function (name) {
     const chats = await client.getChats();
     const group = chats.find(
-        (chat) => chat.isGroup && chat.name.toLowerCase() === name.toLowerCase()
+        (chat) => chat.isGroup && chat.name && chat.name.toLowerCase() === name.toLowerCase()
     );
     return group;
 };
