@@ -1,39 +1,69 @@
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcodeTerm = require("qrcode-terminal");
 const logger = require("./logger");
+const path = require("path");
+const fs = require("fs");
+
+// Helper to find Chrome binary within the local externalcomponen cache
+const findChromeExecutable = () => {
+    const defaultPuppeteerCache = path.join(__dirname, 'externalcomponen', 'puppeteer_cache', 'chrome');
+    if (!fs.existsSync(defaultPuppeteerCache)) return null;
+
+    // Recursively find the 'chrome' binary
+    const findChrome = (dir) => {
+        const files = fs.readdirSync(dir);
+        for (const file of files) {
+            const tempPath = path.join(dir, file);
+            const stat = fs.statSync(tempPath);
+            if (stat.isDirectory()) {
+                const found = findChrome(tempPath);
+                if (found) return found;
+            } else if (file === 'chrome' && stat.mode & 0o111) { // is executable
+                return tempPath;
+            }
+        }
+        return null;
+    };
+
+    return findChrome(defaultPuppeteerCache);
+};
 
 const newBotClient = (sendEvent) => {
+    const puppeteerOptions = {
+        headless: 'old',
+        handleSIGINT: false,
+        args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-accelerated-2d-canvas",
+            "--no-first-run",
+            "--no-zygote",
+            "--disable-gpu",
+            "--disable-extensions",
+            "--disable-default-apps",
+            "--mute-audio",
+            "--no-default-browser-check",
+        ],
+    };
+
+    // If we've bundled Chrome via pack-dependencies.sh, force Puppeteer to use it.
+    const bundledChromePath = findChromeExecutable();
+    if (bundledChromePath) {
+        logger.info(`Using bundled Chromium at: ${bundledChromePath}`);
+        puppeteerOptions.executablePath = bundledChromePath;
+    }
+
     const client = new Client({
         restartOnAuthFail: true,
         authStrategy: new LocalAuth({
             clientId: "session-revem"
         }),
-        puppeteer: {
-            headless: 'old',
-            handleSIGINT: false,
-            args: [
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-accelerated-2d-canvas",
-                "--no-first-run",
-                "--no-zygote",
-                "--disable-gpu",
-                "--disable-extensions",
-                "--disable-default-apps",
-                "--mute-audio",
-                "--no-default-browser-check",
-            ],
-        }
+        puppeteer: puppeteerOptions
     });
 
-    client.on("qr", (qr) => {
-        logger.info('QR Code received/updated');
-        qrcodeTerm.generate(qr, { small: true });
-        sendEvent("qr", qr);
-    });
-
-    client.on("ready", () => {
+    // Capture browser events if possible
+    client.on('ready', () => {
         logger.info("Whatsapp is ready!");
         sendEvent("ready", "");
     });
