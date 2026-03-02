@@ -156,6 +156,53 @@
                 }
             }
         },
+        "/send-group-message": {
+            "post": {
+                "summary": "Send a message to a group",
+                "description": "Sends a text message to a WhatsApp group by its ID or exact Name.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "The exact Group Name"
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "description": "The text message to send"
+                                    }
+                                },
+                                "required": [
+                                    "name",
+                                    "message"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Group message sent!"
+                    },
+                    "400": {
+                        "description": "Bad Request (Missing fields)"
+                    },
+                    "422": {
+                        "description": "Group not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    },
+                    "503": {
+                        "description": "WhatsApp client is not ready"
+                    }
+                }
+            }
+        },
         "/clear-message": {
             "post": {
                 "summary": "Clear chat history",

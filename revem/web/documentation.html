@@ -146,9 +146,22 @@
             <h2>2. REST API Endpoints</h2>
             <p>You can test all these endpoints interactively via the <a href="/web/swagger">Swagger UI</a>.</p>
 
-            <h3>Sending Messages</h3>
-            <p>Automatically formats Indonesian numbers (e.g., changing <code>08...</code> to <code>628...</code>) and
-                appends the required <code>@c.us</code> suffix.</p>
+            <div style="background: #e9edef; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h3>🌟 Universal Target Resolution</h3>
+                <p>
+                    In all of the general endpoints below, the <code>number</code> parameter is a <strong>universal
+                        target</strong>. You can provide:
+                </p>
+                <ul>
+                    <li>An exact <strong>Group Name</strong> (e.g., "Family Group")</li>
+                    <li>An exact <strong>Contact Name</strong> (e.g., "John Doe")</li>
+                    <li>A raw <strong>Phone Number</strong> (e.g., "08123456789" or "628123456789")</li>
+                </ul>
+                <p>The server automatically resolves the appropriate ID before sending.</p>
+            </div>
+
+            <h3>Sending a Text Message</h3>
+            <p>Sends a text message to a number, contact, or group.</p>
             <pre>POST /send-message
 {
     "number": "08123456789",
@@ -172,13 +185,20 @@ Content-Type: multipart/form-data
 - caption: "My uploaded file"
 - file: (file attachment)</pre>
 
-            <h3>Group Messaging</h3>
-            <p>Sends messages to a group using the exact Group Name. The system will automatically search your chats to
-                find the correct group ID.</p>
+            <h3>Group Messaging (Legacy)</h3>
+            <p>Sends messages to a group using the exact Group Name. (Note: <code>/send-message</code> can now also
+                handle groups directly).</p>
             <pre>POST /send-group-message
 {
     "name": "My WhatsApp Group",
     "message": "Announcement message"
+}</pre>
+
+            <h3>Clearing Messages</h3>
+            <p>Deletes the chat history on the bot's side.</p>
+            <pre>POST /clear-message
+{
+    "number": "08123456789"
 }</pre>
         </div>
 

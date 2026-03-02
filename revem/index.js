@@ -269,6 +269,50 @@ app.post(
     }
 );
 
+// Send message to group (Legacy Compatibility)
+app.post(
+    '/send-group-message',
+    [
+        body('name').notEmpty().withMessage('Group Name is required'),
+        body('message').notEmpty().withMessage('Message is required'),
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ status: false, message: errors.array()[0].msg });
+        }
+
+        const groupName = req.body.name;
+        const message = req.body.message;
+
+        if (!isClientReady) {
+            return res.status(503).json({ status: false, message: 'WhatsApp client is not ready' });
+        }
+
+        try {
+            const group = await findGroupByName(groupName);
+            if (!group) {
+                return res.status(422).json({ status: false, message: 'Group not found' });
+            }
+
+            const chatId = group.id._serialized;
+
+            await client.sendMessage(chatId, message);
+            logger.info('Outgoing group message sent', {
+                type: 'group_text',
+                recipient: chatId,
+                groupName: groupName,
+                content: message,
+                category: 'API'
+            });
+            res.status(200).json({ status: true, message: 'Group message sent!' });
+        } catch (error) {
+            logger.error('Error in /send-group-message:', error);
+            res.status(500).json({ status: false, message: error.message });
+        }
+    }
+);
+
 // Clear message
 app.post('/clear-message', async (req, res) => {
     const targetInput = req.body.number;
