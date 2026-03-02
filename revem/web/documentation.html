@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp API Documentation</title>
+    <style>
+        :root {
+            --primary: #25D366;
+            --bg-light: #f0f2f5;
+            --text-dark: #111b21;
+            --panel-bg: #ffffff;
+            --border: #e9edef;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .header {
+            background-color: var(--primary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background: var(--panel-bg);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+            color: #128C7E;
+        }
+
+        h3 {
+            color: #075E54;
+            margin-top: 1.5rem;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #d12249;
+        }
+
+        pre {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: -1rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-button {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-button:hover {
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>WhatsApp API Project Documentation</h1>
+        <p>A comprehensive guide on how the API and Bot components interact</p>
+    </div>
+
+    <div class="nav-links">
+        <a href="/web" class="nav-button">View Live Logs</a>
+        <a href="/web/swagger" class="nav-button">Swagger API Playground</a>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>Overview</h2>
+            <p>This project is a modularized Node.js application utilizing <code>whatsapp-web.js</code> and Express. It
+                acts as both an automated responder (Bot) and an automated sender (REST API).</p>
+            <p>The system is designed for high stability, featuring pre-flight cleanup checks, daily rotated logging,
+                and automated phone number formatting.</p>
+        </div>
+
+        <div class="card">
+            <h2>1. Architecture</h2>
+            <ul>
+                <li><strong><code>index.js</code></strong>: The core HTTP server. Exposes the endpoints, initializes the
+                    WhatsApp Bot, and handles graceful shutdowns.</li>
+                <li><strong><code>bot.js</code></strong>: The isolated WhatsApp client configuration. Manages Puppeteer
+                    arguments for stability, listens to WhatsApp events, and handles automatic bot replies.</li>
+                <li><strong><code>logger.js</code></strong>: Centralized Winston logger utilizing
+                    <code>winston-daily-rotate-file</code> to safely manage daily logs.</li>
+                <li><strong><code>web/</code></strong>: Contains this documentation, the Swagger API definition, and the
+                    Log Viewer interface.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>2. REST API Endpoints</h2>
+            <p>You can test all these endpoints interactively via the <a href="/web/swagger">Swagger UI</a>.</p>
+
+            <h3>Sending Messages</h3>
+            <p>Automatically formats Indonesian numbers (e.g., changing <code>08...</code> to <code>628...</code>) and
+                appends the required <code>@c.us</code> suffix.</p>
+            <pre>POST /send-message
+{
+    "number": "08123456789",
+    "message": "Hello from the API!"
+}</pre>
+
+            <h3>Sending Media via URL</h3>
+            <p>Fetches media synchronously from a URL and sends it as a WhatsApp attachment.</p>
+            <pre>POST /send-media
+{
+    "number": "08123456789",
+    "file": "https://example.com/image.png",
+    "caption": "Check out this image!"
+}</pre>
+
+            <h3>Group Messaging</h3>
+            <p>Sends messages to a group. You can provide either the exact Group Name or the Group ID.</p>
+            <pre>POST /send-group-message
+{
+    "name": "My WhatsApp Group",
+    "message": "Announcement message"
+}</pre>
+        </div>
+
+        <div class="card">
+            <h2>3. Auto-Bot Commands</h2>
+            <p>The system constantly listens to incoming messages. If a match is found, it automatically replies:</p>
+            <ul>
+                <li><code>!ping</code> - Bot replies: "pong"</li>
+                <li><code>good morning</code> - Bot replies: "selamat pagi"</li>
+                <li><code>!groups</code> - Bot replies with a formatted list of all groups the bot is currently a member
+                    of, including their exact IDs.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>4. Logging System</h2>
+            <p>All outgoing messages generated by either the REST API or the Bot are securely logged into daily rotated
+                files located in <code>/logs/YYYY-MM-DD/whatsapp.log</code>. These logs contain metadata like
+                <code>category</code>, <code>recipient</code>, and <code>content</code>.</p>
+            <p>You can view today's logs directly via the <a href="/web">Log Interface</a>.</p>
+        </div>
+    </div>
+</body>
+
+</html>

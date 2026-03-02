@@ -1,0 +1,197 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "WhatsApp API (Revem)",
+        "description": "API for sending messages and media via WhatsApp Web JS",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Local server"
+        }
+    ],
+    "paths": {
+        "/send-message": {
+            "post": {
+                "summary": "Send a text message",
+                "description": "Sends a text message to a specific phone number.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "number": {
+                                        "type": "string",
+                                        "description": "The recipient's phone number (e.g., 08123456789 or 628123456789)"
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "description": "The text message to send"
+                                    }
+                                },
+                                "required": [
+                                    "number",
+                                    "message"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Message sent!"
+                    },
+                    "400": {
+                        "description": "Bad Request (Missing fields)"
+                    },
+                    "422": {
+                        "description": "Number is not registered on WhatsApp"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    },
+                    "503": {
+                        "description": "WhatsApp client is not ready"
+                    }
+                }
+            }
+        },
+        "/send-media": {
+            "post": {
+                "summary": "Send media via URL",
+                "description": "Sends a media file (image, video, document) from a given URL to a specific phone number.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "number": {
+                                        "type": "string",
+                                        "description": "The recipient's phone number"
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "description": "The URL of the media file to send"
+                                    },
+                                    "caption": {
+                                        "type": "string",
+                                        "description": "Optional text caption for the media"
+                                    }
+                                },
+                                "required": [
+                                    "number",
+                                    "file"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Media sent!"
+                    },
+                    "400": {
+                        "description": "Bad Request (Missing fields)"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    },
+                    "503": {
+                        "description": "WhatsApp client is not ready"
+                    }
+                }
+            }
+        },
+        "/send-group-message": {
+            "post": {
+                "summary": "Send a message to a group",
+                "description": "Sends a text message to a WhatsApp group by its ID or exact Name.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "description": "The Group ID (e.g., 1234567890@g.us). Optional if name is provided."
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "description": "The exact Group Name. Optional if id is provided."
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "description": "The text message to send"
+                                    }
+                                },
+                                "required": [
+                                    "message"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Group message sent!"
+                    },
+                    "400": {
+                        "description": "Bad Request (Missing fields)"
+                    },
+                    "422": {
+                        "description": "Group not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    },
+                    "503": {
+                        "description": "WhatsApp client is not ready"
+                    }
+                }
+            }
+        },
+        "/clear-message": {
+            "post": {
+                "summary": "Clear chat history",
+                "description": "Clears the chat history with a specific phone number.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "number": {
+                                        "type": "string",
+                                        "description": "The phone number to clear chat with"
+                                    }
+                                },
+                                "required": [
+                                    "number"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Chat cleared"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    },
+                    "503": {
+                        "description": "WhatsApp client is not ready"
+                    }
+                }
+            }
+        }
+    }
+}

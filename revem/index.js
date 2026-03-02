@@ -7,6 +7,8 @@ const socketIo = require('socket.io');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./web/swagger.json');
 const logger = require('./logger');
 const { newBotClient } = require('./bot');
 
@@ -55,6 +57,41 @@ const findGroupByName = async function (name) {
     );
     return group;
 };
+
+// Setup Swagger UI
+app.use('/web/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+// Web Interface Routes
+app.get('/web', (req, res) => {
+    res.sendFile(path.join(__dirname, 'web', 'logs.html'));
+});
+
+app.get('/web/documentasi', (req, res) => {
+    res.sendFile(path.join(__dirname, 'web', 'documentation.html'));
+});
+
+app.get('/api/logs', (req, res) => {
+    const date = req.query.date; // format YYYY-MM-DD
+    if (!date) {
+        return res.status(400).json({ status: false, message: 'Date parameter is required' });
+    }
+
+    const logFilePath = path.join(__dirname, 'logs', date, `whatsapp-${date}.log`);
+
+    if (!fs.existsSync(logFilePath)) {
+        return res.status(200).json({ status: true, logs: [] });
+    }
+
+    try {
+        const fileContent = fs.readFileSync(logFilePath, 'utf8');
+        // Split by newline and remove empty lines
+        const logsArray = fileContent.split('\n').filter(line => line.trim() !== '');
+        res.status(200).json({ status: true, logs: logsArray });
+    } catch (err) {
+        logger.error(`Error reading log file ${logFilePath}:`, err);
+        res.status(500).json({ status: false, message: 'Failed to read logs' });
+    }
+});
 
 // API Routes
 
