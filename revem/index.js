@@ -1,25 +1,13 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
+const { MessageMedia } = require('whatsapp-web.js');
 const express = require('express');
+const { body, validationResult } = require('express-validator');
+const fileUpload = require('express-fileupload');
 const http = require('http');
 const socketIo = require('socket.io');
-const winston = require('winston');
-
-// Logger setup
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json()
-    ),
-    transports: [
-        new winston.transports.Console({
-            format: winston.format.simple(),
-        }),
-        new winston.transports.File({ filename: 'error.log', level: 'error' }),
-        new winston.transports.File({ filename: 'combined.log' }),
-    ],
-});
+const axios = require('axios');
+const fs = require('fs');
+const logger = require('./logger');
+const { newBotClient } = require('./bot');
 
 const app = express();
 const server = http.createServer(app);
@@ -28,104 +16,175 @@ let isClientReady = false;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(fileUpload({ debug: false }));
 
-const client = new Client({
-    authStrategy: new LocalAuth({
-        clientId: "session-revem"
-    }),
-    puppeteer: {
-        headless: true,
-        handleSIGINT: false,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--disable-gpu'
-        ],
+// Initialize WhatsApp Client
+const client = newBotClient((event, data) => {
+    io.emit(event, data);
+    if (event === 'ready') isClientReady = true;
+    if (event === 'disconnected' || event === 'auth_failure') isClientReady = false;
+});
+
+// Helpers
+const phoneNumberFormatter = (number) => {
+    // 1. Menghilangkan karakter selain angka
+    let formatted = number.replace(/\D/g, '');
+
+    // 2. Menghilangkan angka 0 di depan (prefix) dan ganti dengan 62
+    if (formatted.startsWith('0')) {
+        formatted = '62' + formatted.slice(1);
     }
-});
 
-client.on('qr', (qr) => {
-    logger.info('QR Code received/updated');
-    qrcode.generate(qr, { small: true });
-    io.emit('qr', qr);
-});
-
-client.on('ready', () => {
-    logger.info('Client is ready!');
-    isClientReady = true;
-});
-
-client.on('loading_screen', (percent, message) => {
-    logger.info(`LOADING SCREEN: ${percent}% - ${message}`);
-});
-
-client.on('disconnected', (reason) => {
-    logger.info('Client was logged out', reason);
-    isClientReady = false;
-});
-
-client.on('authenticated', () => {
-    logger.info('AUTHENTICATED');
-});
-
-client.on('auth_failure', msg => {
-    logger.error('AUTHENTICATION FAILURE', msg);
-    isClientReady = false;
-});
-
-client.on('message', async msg => {
-    if (msg.body === '!ping') {
-        msg.reply('pong');
+    if (!formatted.endsWith('@c.us')) {
+        formatted += '@c.us';
     }
-});
+
+    return formatted;
+};
+
+const checkRegisteredNumber = async function (number) {
+    const isRegistered = await client.isRegisteredUser(number);
+    return isRegistered;
+};
+
+const findGroupByName = async function (name) {
+    const chats = await client.getChats();
+    const group = chats.find(
+        (chat) => chat.isGroup && chat.name.toLowerCase() === name.toLowerCase()
+    );
+    return group;
+};
 
 // API Routes
-app.post('/send-message', async (req, res) => {
-    let { number, message } = req.body;
 
-    if (!number || !message) {
-        return res.status(400).json({ status: false, message: 'Number and message are required' });
-    }
-
-    try {
-        // Format number: hilangkan karakter non-digit
-        number = number.replace(/\D/g, '');
-
-        // Jika diawali dengan '0', ganti dengan '62'
-        if (number.startsWith('0')) {
-            number = '62' + number.slice(1);
+// Send message
+app.post(
+    '/send-message',
+    [
+        body('number').notEmpty().withMessage('Number is required'),
+        body('message').notEmpty().withMessage('Message is required'),
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ status: false, message: errors.array()[0].msg });
         }
 
-        const chatId = number.includes('@c.us') ? number : `${number}@c.us`;
+        const number = phoneNumberFormatter(req.body.number);
+        const message = req.body.message;
 
-        // Cekapakah client sudah siap
         if (!isClientReady) {
-            return res.status(503).json({ status: false, message: 'WhatsApp client is not ready yet. Please wait for initialization or scan QR code.' });
+            return res.status(503).json({ status: false, message: 'WhatsApp client is not ready' });
         }
 
         try {
-            const state = await client.getState();
-            if (state !== 'CONNECTED') {
-                return res.status(500).json({ status: false, message: 'WhatsApp client is not connected' });
+            const isRegistered = await checkRegisteredNumber(number);
+            if (!isRegistered) {
+                return res.status(422).json({ status: false, message: 'Number is not registered' });
             }
-        } catch (e) {
-            logger.error('Error getting client state:', e);
-            return res.status(500).json({ status: false, message: 'WhatsApp client state error: ' + e.message });
+
+            await client.sendMessage(number, message);
+            res.status(200).json({ status: true, message: 'Message sent!' });
+        } catch (error) {
+            logger.error('Error in /send-message:', error);
+            res.status(500).json({ status: false, message: error.message });
+        }
+    }
+);
+
+// Send media via URL
+app.post(
+    '/send-media',
+    [
+        body('number').notEmpty().withMessage('Number is required'),
+        body('file').notEmpty().withMessage('File URL is required'),
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ status: false, message: errors.array()[0].msg });
         }
 
-        await client.sendMessage(chatId, message);
-        res.status(200).json({ status: true, message: 'Message sent!' });
+        const number = phoneNumberFormatter(req.body.number);
+        const fileUrl = req.body.file;
+        const caption = req.body.caption || '';
+
+        if (!isClientReady) {
+            return res.status(503).json({ status: false, message: 'WhatsApp client is not ready' });
+        }
+
+        try {
+            const response = await axios.get(fileUrl, { responseType: 'arraybuffer' });
+            const mimetype = response.headers['content-type'];
+            const attachment = response.data.toString('base64');
+            const media = new MessageMedia(mimetype, attachment, 'Media');
+
+            await client.sendMessage(number, media, { caption });
+            res.status(200).json({ status: true, message: 'Media sent!' });
+        } catch (error) {
+            logger.error('Error in /send-media:', error);
+            res.status(500).json({ status: false, message: error.message });
+        }
+    }
+);
+
+// Send message to group
+app.post(
+    '/send-group-message',
+    [
+        body('message').notEmpty().withMessage('Message is required'),
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ status: false, message: errors.array()[0].msg });
+        }
+
+        let chatId = req.body.id;
+        const groupName = req.body.name;
+        const message = req.body.message;
+
+        if (!isClientReady) {
+            return res.status(503).json({ status: false, message: 'WhatsApp client is not ready' });
+        }
+
+        try {
+            if (!chatId && groupName) {
+                const group = await findGroupByName(groupName);
+                if (!group) {
+                    return res.status(422).json({ status: false, message: 'Group not found' });
+                }
+                chatId = group.id._serialized;
+            }
+
+            if (!chatId) {
+                return res.status(400).json({ status: false, message: 'Group ID or Name is required' });
+            }
+
+            await client.sendMessage(chatId, message);
+            res.status(200).json({ status: true, message: 'Group message sent!' });
+        } catch (error) {
+            logger.error('Error in /send-group-message:', error);
+            res.status(500).json({ status: false, message: error.message });
+        }
+    }
+);
+
+// Clear message
+app.post('/clear-message', async (req, res) => {
+    const number = phoneNumberFormatter(req.body.number);
+
+    if (!isClientReady) {
+        return res.status(503).json({ status: false, message: 'WhatsApp client is not ready' });
+    }
+
+    try {
+        const chat = await client.getChatById(number);
+        await chat.clearMessages();
+        res.status(200).json({ status: true, message: 'Chat cleared' });
     } catch (error) {
-        logger.error('Error sending message detailed:', {
-            error: error.message,
-            stack: error.stack,
-            number: number
-        });
-        res.status(500).json({ status: false, message: 'Failed to send message: ' + error.message });
+        logger.error('Error in /clear-message:', error);
+        res.status(500).json({ status: false, message: error.message });
     }
 });
 
@@ -138,8 +197,6 @@ server.listen(PORT, () => {
 // Graceful shutdown
 const gracefulShutdown = async (signal) => {
     logger.info(`Received ${signal}. Shutting down gracefully...`);
-
-    // Set a timeout to force quit if it takes too long
     const timeout = setTimeout(() => {
         logger.error('Shutdown timed out, forcing exit.');
         process.exit(1);
@@ -150,7 +207,6 @@ const gracefulShutdown = async (signal) => {
             logger.info('Destroying WhatsApp client...');
             await client.destroy();
         }
-
         if (server) {
             logger.info('Closing HTTP server...');
             server.close(() => {
