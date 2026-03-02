@@ -118,13 +118,9 @@
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "id": {
-                                        "type": "string",
-                                        "description": "The Group ID (e.g., 1234567890@g.us). Optional if name is provided."
-                                    },
                                     "name": {
                                         "type": "string",
-                                        "description": "The exact Group Name. Optional if id is provided."
+                                        "description": "The exact Group Name"
                                     },
                                     "message": {
                                         "type": "string",
@@ -132,6 +128,7 @@
                                     }
                                 },
                                 "required": [
+                                    "name",
                                     "message"
                                 ]
                             }

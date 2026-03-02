@@ -183,6 +183,7 @@ app.post(
 app.post(
     '/send-group-message',
     [
+        body('name').notEmpty().withMessage('Group Name is required'),
         body('message').notEmpty().withMessage('Message is required'),
     ],
     async (req, res) => {
@@ -191,7 +192,6 @@ app.post(
             return res.status(400).json({ status: false, message: errors.array()[0].msg });
         }
 
-        let chatId = req.body.id;
         const groupName = req.body.name;
         const message = req.body.message;
 
@@ -200,22 +200,12 @@ app.post(
         }
 
         try {
-            if (!chatId && groupName) {
-                const group = await findGroupByName(groupName);
-                if (!group) {
-                    return res.status(422).json({ status: false, message: 'Group not found' });
-                }
-                chatId = group.id._serialized;
+            const group = await findGroupByName(groupName);
+            if (!group) {
+                return res.status(422).json({ status: false, message: 'Group not found' });
             }
 
-            if (!chatId) {
-                return res.status(400).json({ status: false, message: 'Group ID or Name is required' });
-            }
-
-            // Ensure the chatId is formatted correctly as a group ID
-            if (chatId && !chatId.includes('@g.us')) {
-                chatId = `${chatId}@g.us`;
-            }
+            const chatId = group.id._serialized;
 
             await client.sendMessage(chatId, message);
             logger.info('Outgoing group message sent', {
