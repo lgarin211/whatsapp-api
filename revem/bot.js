@@ -57,14 +57,17 @@ const newBotClient = (sendEvent) => {
     client.on("message", (msg) => {
         if (msg.body === "!ping") {
             msg.reply("pong");
+            logger.info('Outgoing bot reply', { type: 'text', recipient: msg.from, content: 'pong', category: 'BOT' });
         } else if (msg.body.toLowerCase() === "good morning") {
             msg.reply("selamat pagi");
+            logger.info('Outgoing bot reply', { type: 'text', recipient: msg.from, content: 'selamat pagi', category: 'BOT' });
         } else if (msg.body === "!groups") {
             client.getChats().then((chats) => {
                 const groups = chats.filter((chat) => chat.isGroup);
 
                 if (groups.length === 0) {
                     msg.reply("You have no group yet.");
+                    logger.info('Outgoing bot reply', { type: 'text', recipient: msg.from, content: 'You have no group yet.', category: 'BOT' });
                 } else {
                     let replyMsg = "*YOUR GROUPS*\n\n";
                     groups.forEach((group, i) => {
@@ -73,6 +76,7 @@ const newBotClient = (sendEvent) => {
                     replyMsg +=
                         "_You can use the group id to send a message to the group._";
                     msg.reply(replyMsg);
+                    logger.info('Outgoing bot reply', { type: 'text', recipient: msg.from, content: 'Groups List', category: 'BOT' });
                 }
             });
         }

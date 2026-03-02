@@ -84,6 +84,12 @@ app.post(
             }
 
             await client.sendMessage(number, message);
+            logger.info('Outgoing message sent', {
+                type: 'text',
+                recipient: number,
+                content: message,
+                category: 'API'
+            });
             res.status(200).json({ status: true, message: 'Message sent!' });
         } catch (error) {
             logger.error('Error in /send-message:', error);
@@ -120,6 +126,13 @@ app.post(
             const media = new MessageMedia(mimetype, attachment, 'Media');
 
             await client.sendMessage(number, media, { caption });
+            logger.info('Outgoing media sent', {
+                type: 'media',
+                recipient: number,
+                caption: caption,
+                fileUrl: fileUrl,
+                category: 'API'
+            });
             res.status(200).json({ status: true, message: 'Media sent!' });
         } catch (error) {
             logger.error('Error in /send-media:', error);
@@ -162,6 +175,13 @@ app.post(
             }
 
             await client.sendMessage(chatId, message);
+            logger.info('Outgoing group message sent', {
+                type: 'group_text',
+                recipient: chatId,
+                groupName: groupName,
+                content: message,
+                category: 'API'
+            });
             res.status(200).json({ status: true, message: 'Group message sent!' });
         } catch (error) {
             logger.error('Error in /send-group-message:', error);
