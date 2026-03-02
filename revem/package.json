@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "NODE_PATH=./externalcomponen/node_modules PUPPETEER_CACHE_DIR=./externalcomponen/puppeteer_cache node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
