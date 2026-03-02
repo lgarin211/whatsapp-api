@@ -9,7 +9,7 @@ const newBotClient = (sendEvent) => {
             clientId: "session-revem"
         }),
         puppeteer: {
-            headless: true,
+            headless: 'old',
             handleSIGINT: false,
             args: [
                 "--no-sandbox",
@@ -19,6 +19,10 @@ const newBotClient = (sendEvent) => {
                 "--no-first-run",
                 "--no-zygote",
                 "--disable-gpu",
+                "--disable-extensions",
+                "--disable-default-apps",
+                "--mute-audio",
+                "--no-default-browser-check",
             ],
         }
     });

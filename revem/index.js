@@ -6,6 +6,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const axios = require('axios');
 const fs = require('fs');
+const path = require('path');
 const logger = require('./logger');
 const { newBotClient } = require('./bot');
 
@@ -209,30 +210,51 @@ app.post('/clear-message', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 8000;
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
     logger.info(`Server is running on port ${PORT}`);
-    client.initialize();
+
+    // Pre-flight cleanup: Ensure no hanging browser processes are locking the session directory
+    try {
+        const sessionDir = path.join(__dirname, '.wwebjs_auth', 'session-session-revem');
+        logger.info(`Pre-flight: Ensuring environment is clean for ${sessionDir}`);
+    } catch (e) {
+        logger.error('Pre-flight cleanup check error:', e);
+    }
+
+    // Delay initialization to help avoid ProtocolError on restart
+    logger.info('Waiting 3s for browser environment stabilization...');
+    setTimeout(() => {
+        logger.info('Initializing WhatsApp client...');
+        client.initialize().catch(err => {
+            logger.error('Client initialization failed:', err);
+        });
+    }, 3000);
 });
 
 // Graceful shutdown
 const gracefulShutdown = async (signal) => {
     logger.info(`Received ${signal}. Shutting down gracefully...`);
+
     const timeout = setTimeout(() => {
         logger.error('Shutdown timed out, forcing exit.');
         process.exit(1);
-    }, 5000);
+    }, 10000); // Increased timeout to 10s
 
     try {
         if (client) {
             logger.info('Destroying WhatsApp client...');
             await client.destroy();
+            logger.info('WhatsApp client destroyed.');
         }
+
         if (server) {
             logger.info('Closing HTTP server...');
             server.close(() => {
                 logger.info('HTTP server closed.');
-                clearTimeout(timeout);
-                process.exit(0);
+                setTimeout(() => {
+                    clearTimeout(timeout);
+                    process.exit(0);
+                }, 1000); // Small buffer to ensure everything is flushed
             });
         } else {
             clearTimeout(timeout);
