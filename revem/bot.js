@@ -30,7 +30,7 @@ const findChromeExecutable = () => {
 
 const newBotClient = (sendEvent) => {
     const puppeteerOptions = {
-        headless: 'old',
+        headless: true,
         handleSIGINT: false,
         args: [
             "--no-sandbox",
@@ -63,6 +63,13 @@ const newBotClient = (sendEvent) => {
     });
 
     // Capture browser events if possible
+    client.on('qr', (qr) => {
+        logger.info("QR RECEIVED", qr);
+        // Print QR code to terminal
+        qrcodeTerm.generate(qr, { small: true });
+        sendEvent("qr", qr);
+    });
+
     client.on('ready', () => {
         logger.info("Whatsapp is ready!");
         sendEvent("ready", "");

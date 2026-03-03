@@ -6,6 +6,7 @@ echo " Packaging Dependencies for Offline Production Deployment"
 echo "=========================================================="
 
 # Create the target offline directory
+rm -rf externalcomponen
 mkdir -p externalcomponen
 
 echo "[1/4] Installing all NPM packages locally first..."
